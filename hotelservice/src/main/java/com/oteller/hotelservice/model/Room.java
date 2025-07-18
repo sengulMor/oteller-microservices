@@ -1,31 +1,54 @@
 package com.oteller.hotelservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "rooms")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Room {
-    @Id
-    @GeneratedValue
-    private Long id;
-    private String roomNumber;
-    private int capacity;
-    private BigDecimal pricePerNight;
-    private boolean available;
-    private boolean reserved;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+@Table(name = "rooms", uniqueConstraints = {@UniqueConstraint(columnNames = {"room_number", "hotel_id"})})
+public class Room extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "hotel_id") // foreign key
+    @NotBlank(message = "Room Number can not be blank")
+    @Column(name = "room_number", nullable = false, length = 4)
+    private String roomNumber;
+
+    @Min(value = 1, message = "Capacity must be at least 1")
+    @Column(name = "capacity", nullable = false)
+    private int capacity;
+
+    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    @Column(name = "price_per_night", nullable = false)
+    private BigDecimal pricePerNight;
+
+    @Column(name = "available")
+    private boolean available;
+
+    @Column(name = "guest_name")
+    private String guestName;
+
+    @Column(name = "check_in_date")
+    private LocalDate checkInDate;
+
+    @Column(name = "check_out_date")
+    private LocalDate checkOutDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id")
+    @JsonIgnore
     private Hotel hotel;
+
 }
+
+
+
+

@@ -1,38 +1,39 @@
 package com.oteller.hotelservice.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "hotels")
-@Data
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Hotel {
+@Table(name = "hotels")
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+public class Hotel extends BaseEntity{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @NotBlank(message = "Name can not be blank")
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @Column(name = "star_rating", nullable = false)
     private int starRating;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    @JoinColumn(name = "address_id", referencedColumnName = "id", unique = true)
     private Address address;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 
+    public void addRoom(Room room) {
+        rooms.add(room);
+        room.setHotel(this);
+    }
 }

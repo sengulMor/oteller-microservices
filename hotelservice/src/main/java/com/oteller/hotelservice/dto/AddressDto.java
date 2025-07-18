@@ -18,4 +18,6 @@ public class AddressDto {
     private String city;
     @NotBlank(message = "Country is required")
     private String country;
+    @NotBlank(message = "Zip Code is required")
+    private String zipCode;
 }

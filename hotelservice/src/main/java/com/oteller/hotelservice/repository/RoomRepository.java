@@ -15,9 +15,14 @@ import java.util.Optional;
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT r FROM Room r WHERE r.id = :roomId")
-    Optional<Room> findRoomForUpdate(@Param("roomId") Long roomId);
+    @Query("SELECT r FROM Room r WHERE r.id = :roomId AND r.hotel.id = :hotelId")
+    Optional<Room> findRoomForUpdate(@Param("roomId") Long roomId, @Param("hotelId") Long hotelId);
 
-    Optional<List<Room>> findAllByHotelId(Long hotelId);
+    List<Room> findAllByHotelId(Long hotelId);
+
+    Optional<Room> findByHotel_IdAndRoomNumber(Long hotelId, String roomNumber);
+
+    Optional<Room> findByIdAndHotel_Id(Long id, Long hotelId);
+
 
 }

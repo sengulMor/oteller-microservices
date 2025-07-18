@@ -1,25 +1,35 @@
 package com.oteller.hotelservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 @Entity
 @Table(name = "address")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Address {
+public class Address extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @NotBlank(message = "Street must not be blank")
+    @Column(name = "street", nullable = false, length = 255)
     private String street;
+
+    @NotBlank(message = "City must not be blank")
+    @Column(name = "city", nullable = false, length = 100)
     private String city;
+
+    @NotBlank(message = "Country must not be blank")
+    @Column(name = "country", nullable = false, length = 100)
     private String country;
 
+    @NotBlank(message = "Zip code must not be blank")
+    @Column(name = "zip_code", nullable = false, length = 20)
+    private String zipCode;
+
+    @JsonIgnore
     @OneToOne(mappedBy = "address")
     private Hotel hotel;
 

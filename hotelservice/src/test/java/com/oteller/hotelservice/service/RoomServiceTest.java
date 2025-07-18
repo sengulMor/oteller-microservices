@@ -3,33 +3,35 @@ package com.oteller.hotelservice.service;
 import com.oteller.events.RoomReservedEvent;
 import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
 import com.oteller.hotelservice.dto.RoomDto;
+import com.oteller.hotelservice.exception.HotelNotFoundException;
+import com.oteller.hotelservice.exception.RoomNotFoundException;
+import com.oteller.hotelservice.mapper.RoomMapper;
 import com.oteller.hotelservice.model.Address;
 import com.oteller.hotelservice.model.Hotel;
 import com.oteller.hotelservice.model.Room;
 import com.oteller.hotelservice.repository.HotelRepository;
 import com.oteller.hotelservice.repository.RoomRepository;
-import com.oteller.hotelservice.services.KafkaProducer;
+import com.oteller.hotelservice.kafka.producer.KafkaProducer;
 import com.oteller.hotelservice.services.RoomService;
-import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class RoomServiceTest {
-
-    @InjectMocks
-    private RoomService roomService;
+class RoomServiceTest {
 
     @Mock
     private RoomRepository roomRepository;
@@ -40,134 +42,103 @@ public class RoomServiceTest {
     @Mock
     private KafkaProducer kafkaProducer;
 
+    @Mock
+    private RoomMapper roomMapper;
+
+    @InjectMocks
+    private RoomService roomService;
+
+    private RoomDto roomDto;
+    private Hotel hotel;
+    private Address address;
+    private Room room;
+    Long hotelId = 4L;
+
+    @BeforeEach
+    void setUp() {
+        address = new Address("Max street 3", "Ankara", "Turkey", "35126", null);
+        hotel = new Hotel("Test Hotel", 3, address, null);
+        hotel.setId(hotelId);
+        roomDto = RoomDto.builder()
+                .id(1L)
+                .roomNumber("101")
+                .available(true)
+                .hotelId(hotel.getId())
+                .build();
+        room = new Room("101", 2, new BigDecimal("40.99"), true, "", null, null, hotel);
+    }
+
     @Test
     void shouldCreateRoomSuccessfully() {
-        //Given
-        Hotel hotel = getHotel();
-        Room room = getRoom();
-        room.setHotel(hotel);
-        RoomDto roomDto = getRoomDto();
-        when(hotelRepository.findById(any())).thenReturn(Optional.of(hotel));
-        when(roomRepository.save(any(Room.class))).thenReturn(room);
-        // When
+        Mockito.when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+        Mockito.when(roomMapper.toEntity(roomDto, hotel)).thenReturn(room);
+        Mockito.when(roomRepository.save(room)).thenReturn(room);
+        Mockito.when(roomMapper.toDto(room)).thenReturn(roomDto);
+
         RoomDto result = roomService.create(roomDto);
-        // Then
-        verify(roomRepository, times(1)).save(room);
+
+        assertNotNull(result);
         assertEquals(roomDto.getRoomNumber(), result.getRoomNumber());
-        assertEquals(roomDto.getHotelId(), result.getHotelId());
-    }
-
-    @Test
-    void shouldRoomGetByIdSuccessfully() {
-        //Given
-        Hotel hotel = getHotel();
-        Room room = getRoom();
-        room.setHotel(hotel);
-        when(roomRepository.findById(2L)).thenReturn(Optional.of(room));
-        // When
-        RoomDto result = roomService.getById(2L);
-        // Then
-        verify(roomRepository, times(1)).findById(2L);
-        assertEquals(room.getRoomNumber(), result.getRoomNumber());
-        assertEquals(room.getHotel().getId(), result.getHotelId());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenHotelNotFound() {
-        //Given
-        Long roomId = 1L;
-        when(roomRepository.findById(roomId)).thenReturn(Optional.empty());
-        //When
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            roomService.getById(roomId);
-        });
-        //Then
-        assertEquals("Room not found", exception.getMessage());
-    }
-
-    @Test
-    void shouldGetAllRoomsOfHotelSuccessfully() {
-        //Given
-        Long hotelId = 1L;
-        Hotel hotel = getHotel();
-        Room room = getRoom();
-        room.setHotel(hotel);
-        when(roomRepository.findAllByHotelId(hotelId)).thenReturn(Optional.of(Arrays.asList(room)));
-        // When
-        List<RoomDto> rooms = roomService.getAllRoomsOfHotel(hotelId);
-        // Then
-        verify(roomRepository, times(1)).findAllByHotelId(hotelId);
-        assertEquals(room.getRoomNumber(), rooms.get(0).getRoomNumber());
-        assertEquals(room.getHotel().getId(), rooms.get(0).getHotelId());
-    }
-
-    @Test
-    void shouldReturnTrueWhenRoomIsAvailable() {
-        // Given
-        Long roomId = 1L;
-        Room room = getRoom();
-        RoomAvailabilityDTO request = getRoomAvailabilityDto(roomId);
-        when(roomRepository.findRoomForUpdate(roomId)).thenReturn(Optional.of(room));
-        // When
-        Boolean result = roomService.isRoomAvailable(request);
-        // Then
-        assertTrue(result);
-        assertTrue(room.isReserved()); // room should be reserved
         verify(roomRepository).save(room);
+    }
+
+    @Test
+    void shouldThrowHotelNotFoundException_whenHotelDoesNotExist() {
+        Mockito.when(hotelRepository.findById(hotelId)).thenReturn(Optional.empty());
+
+        assertThrows(HotelNotFoundException.class, () -> roomService.create(roomDto));
+    }
+
+    @Test
+    void shouldReserveRoomIfAvailable() {
+        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3));
+        Room roomToReserve = new Room("2", 2, new BigDecimal("40.99"), true, "", null, null, hotel);
+        roomToReserve.setId(1L);
+        Mockito.when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(roomToReserve));
+        Mockito.when(roomRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        boolean reserved = roomService.reserveIfAvailable(dto);
+
+        assertTrue(reserved);
         verify(kafkaProducer).sendRoomReservedEvent(any(RoomReservedEvent.class));
     }
 
     @Test
-    void shouldReturnFalseWhenRoomIsNotAvailable() {
-        // Given
-        Long roomId = 2L;
-        Room room = new Room();
-        RoomAvailabilityDTO request = getRoomAvailabilityDto(roomId);
-        when(roomRepository.findRoomForUpdate(roomId)).thenReturn(Optional.of(room));
-        // When
-        Boolean result = roomService.isRoomAvailable(request);
-        // Then
+    void shouldReturnFalse_whenRoomNotAvailable() {
+        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3));
+        room.setAvailable(false);
+
+        Mockito.when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(room));
+
+        boolean result = roomService.reserveIfAvailable(dto);
+
         assertFalse(result);
-        verify(roomRepository, never()).save(any());
         verify(kafkaProducer, never()).sendRoomReservedEvent(any());
     }
 
-    private RoomDto getRoomDto() {
-        return RoomDto.builder()
-                .roomNumber("3")
-                .capacity(2)
-                .pricePerNight(BigDecimal.valueOf(70.99))
-                .hotelId(2L)
-                .build();
+    @Test
+    void shouldReturnRoomById() {
+        Mockito.when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        Mockito.when(roomMapper.toDto(room)).thenReturn(roomDto);
+
+        RoomDto result = roomService.getById(1L);
+
+        assertEquals(roomDto.getId(), result.getId());
     }
 
-    private RoomAvailabilityDTO getRoomAvailabilityDto(Long roomId) {
-        return RoomAvailabilityDTO.builder()
-                .roomId(roomId)
-                .build();
+    @Test
+    void shouldThrowRoomNotFoundException_whenRoomNotFound() {
+        Mockito.when(roomRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(RoomNotFoundException.class, () -> roomService.getById(1L));
+    }
+
+    @Test
+    void shouldDeleteRoomSuccessfully() {
+        Mockito.when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        roomService.deleteById(1L);
+        verify(roomRepository).delete(room);
     }
 
 
-    private Room getRoom() {
-        Room room = new Room();
-        room.setRoomNumber("3");
-        room.setCapacity(2);
-        room.setPricePerNight(BigDecimal.valueOf(70.99));
-        room.setAvailable(true);
-        room.setReserved(false);
-        return room;
-    }
-
-    private Hotel getHotel() {
-        Address address = new Address();
-        address.setStreet("Bug street 12");
-        address.setCity("İstanbul");
-        address.setCountry("TR");
-        Hotel hotel = new Hotel();
-        hotel.setName("Hotel Sky");
-        hotel.setStarRating(5);
-        hotel.setAddress(address);
-        hotel.setId(2L);
-        return hotel;
-    }
 }

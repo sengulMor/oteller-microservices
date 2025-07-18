@@ -4,13 +4,14 @@ import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.services.RoomService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/rooms")
 public class RoomController {
@@ -23,25 +24,38 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<RoomDto>  create(@Valid @RequestBody RoomDto roomDto) {
-        RoomDto saved = roomService.create(roomDto);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        log.info("room {} saved", roomDto.getRoomNumber());
+        return new ResponseEntity<>(roomService.create(roomDto), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RoomDto> getById(@PathVariable("id")  Long id) {
-        RoomDto roomDto = roomService.getById(id);
-        return ResponseEntity.ok(roomDto);
+        log.info("id= {} room fetched", id);
+        return ResponseEntity.ok(roomService.getById(id));
     }
 
-    @GetMapping("/byHotel/{hotelId}")
-    public ResponseEntity<List<RoomDto>> getAllRoomsOfHotel(@PathVariable("hotelId")  Long hotelId) {
-        List<RoomDto> roomDtos = roomService.getAllRoomsOfHotel(hotelId);
-        return ResponseEntity.ok(roomDtos);
+    @GetMapping
+    public ResponseEntity<List<RoomDto>> getAllRoomsOfHotel(@RequestParam(name = "hotelId") Long hotelId) {
+        log.info("All rooms of hotel hotelId= {} are fetched", hotelId);
+        return ResponseEntity.ok(roomService.getAllRoomsOfHotel(hotelId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable("id")  Long id) {
+        log.info("Deleting room with id={}", id);
+        roomService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping
+    public ResponseEntity<RoomDto> update(@Valid @RequestBody RoomDto roomDto) {
+        log.info("Updating room with id={}", roomDto.getId());
+        return ResponseEntity.ok(roomService.update(roomDto));
     }
 
     @PostMapping("/check-availability")
-    public ResponseEntity<Boolean> checkAvailability(@RequestBody RoomAvailabilityDTO request) {
-        boolean available = roomService.isRoomAvailable(request);
-        return ResponseEntity.ok(available);
+    public ResponseEntity<Boolean> checkAvailability(@RequestBody RoomAvailabilityDTO dto) {
+        log.info("Check availability for room with id={}", dto.getRoomId());
+        return ResponseEntity.ok(roomService.reserveIfAvailable(dto));
     }
 }

@@ -1,5 +1,9 @@
 server:
   port: 8081
+  error:
+    include-stacktrace: never
+    include-message: always
+    include-binding-errors: always
 
 spring:
   application:
@@ -10,6 +14,8 @@ spring:
         jwt:
           issuer-uri: http://localhost:8080
   kafka:
+    topic:
+      room-reserved: room-reserved-events
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer

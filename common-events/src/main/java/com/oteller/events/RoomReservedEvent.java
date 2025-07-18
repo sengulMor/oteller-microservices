@@ -1,16 +1,17 @@
 package com.oteller.events;
 
-import java.time.LocalDate;
 
 public class RoomReservedEvent {
 
     private Long roomId;
+    private Long hotelId;
     private String status;
 
     public RoomReservedEvent() {}
 
-    public RoomReservedEvent(Long roomId, String status) {
+    public RoomReservedEvent(Long roomId, Long hotelId, String status) {
         this.roomId = roomId;
+        this.hotelId = hotelId;
         this.status = status;
     }
 
@@ -28,5 +29,13 @@ public class RoomReservedEvent {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getHotelId() {
+        return hotelId;
+    }
+
+    public void setHotelId(Long hotelId) {
+        this.hotelId = hotelId;
     }
 }

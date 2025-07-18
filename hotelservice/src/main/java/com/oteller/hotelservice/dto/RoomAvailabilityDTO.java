@@ -14,6 +14,8 @@ import java.time.LocalDate;
 public class RoomAvailabilityDTO {
 
     private Long roomId;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Long hotelId;
+    private String guestName;
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
 }

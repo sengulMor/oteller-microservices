@@ -1,19 +1,22 @@
 package com.oteller.hotelservice.dto;
 
+import com.oteller.hotelservice.model.Room;
+import com.oteller.hotelservice.validation.UniqueHotelAddress;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@UniqueHotelAddress
 public class HotelDto {
 
     private Long id;
@@ -22,13 +25,17 @@ public class HotelDto {
     @NotBlank(message = "Hotel name is required")
     private String name;
 
+    @Min(value = 1, message = "Star Rating can not smaller as 1")
+    @Max(value = 5, message = "Star Rating can not bigger as 5")
     private int starRating;
+
+    @NotNull(message = "Address is required")
+    @Valid
+    private AddressDto address;
+
+    private List<Room> rooms;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-    @NotNull(message = "Address is required")
-    @Valid
-    private AddressDto addressDto;
 }
