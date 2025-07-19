@@ -1,5 +1,6 @@
 package com.oteller.hotelservice.services;
 
+import com.oteller.enums.ReservationStatus;
 import com.oteller.events.RoomReservedEvent;
 import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
 import com.oteller.hotelservice.dto.RoomDto;
@@ -111,8 +112,13 @@ public class RoomService {
     }
 
     private void sendEvent(RoomAvailabilityDTO dto) {
-        RoomReservedEvent event = new RoomReservedEvent(dto.getRoomId(), dto.getHotelId(), "CREATED");
+        RoomReservedEvent event = getRoomReservedEvent(dto);
         kafkaProducer.sendRoomReservedEvent(event);
+    }
+
+    private RoomReservedEvent getRoomReservedEvent(RoomAvailabilityDTO dto) {
+        return new RoomReservedEvent(dto.getHotelId(), dto.getRoomId(),
+                dto.getGuestName(), dto.getCheckInDate(), dto.getCheckOutDate(), ReservationStatus.CONFIRMED);
     }
 
     private void reserveRoom(RoomAvailabilityDTO dto, Room room) {

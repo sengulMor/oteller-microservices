@@ -1,12 +1,14 @@
 package com.oteller.events;
 
+import com.oteller.enums.ReservationStatus;
+
 public class ReservationCreatedEvent {
     private Long reservationId;
-    private String status;
+    private ReservationStatus status;
 
     public ReservationCreatedEvent() {}
 
-    public ReservationCreatedEvent(Long reservationId, String status) {
+    public ReservationCreatedEvent(Long reservationId, ReservationStatus status) {
         this.reservationId = reservationId;
         this.status = status;
     }
@@ -19,11 +21,11 @@ public class ReservationCreatedEvent {
         this.reservationId = reservationId;
     }
 
-    public String getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ReservationStatus status) {
         this.status = status;
     }
 }

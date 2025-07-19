@@ -5,13 +5,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "hotel-service")
-public class HotelServiceConfig {
+public class ReservationServiceConfig {
 
     private String baseUrl;
 
     public String getBaseUrl() {
         return baseUrl;
     }
+
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
     }

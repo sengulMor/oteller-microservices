@@ -1,29 +1,43 @@
 package com.oteller.reservationservice.model;
 
+import com.oteller.enums.ReservationStatus;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reservation {
+@Table(name = "reservation")
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+public class Reservation extends BaseEntity {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+    @NotNull
     private Long hotelId;
-    private Long roomId;
-    private String guestName;
-    private LocalDate checkInDate;
-    private LocalDate checkOutDate;
-    private LocalDateTime createdAt;
 
+    @NotNull
+    private Long roomId;
+
+    @NotBlank
+    private String guestName;
+
+    @NotNull
+    private LocalDate checkInDate;
+
+    @NotNull
+    private LocalDate checkOutDate;
+
+    private ReservationStatus status;
 }
+

@@ -1,41 +1,40 @@
 package com.oteller.reservationservice.controller;
 
 import com.oteller.reservationservice.dto.ReservationDTO;
-import com.oteller.reservationservice.repository.ReservationRepository;
 import com.oteller.reservationservice.services.ReservationService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/reservation")
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final ReservationRepository reservationRepository;
 
-    public ReservationController(ReservationService reservationService,
-                                 ReservationRepository reservationRepository) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.reservationRepository = reservationRepository;
     }
 
-    @GetMapping("/allReservations")
-    public ResponseEntity<List<ReservationDTO>> getAllReservations() {
-        List<ReservationDTO> reservations = reservationService.getAll();
-        return ResponseEntity.ok(reservations);
+    @PostMapping
+    public ResponseEntity<String> create(@Valid @RequestBody ReservationDTO dto) {
+        log.info("Reservation for Guest {} create", dto.getGuestName());
+        return ResponseEntity.ok(reservationService.finishReservation(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getById(@PathVariable("id") Long id) {
-        ReservationDTO reservationDTO = reservationService.getById(id);
-        return ResponseEntity.ok(reservationDTO);
+        log.info("id= {} reservation fetch", id);
+        return ResponseEntity.ok(reservationService.getById(id));
     }
 
-   @PostMapping
-    public ResponseEntity<String> create(@RequestBody ReservationDTO request) {
-        String result = reservationService.finishReservation(request);
-        return ResponseEntity.ok(result);
+    @GetMapping
+    public ResponseEntity<List<ReservationDTO>> getAllReservations() {
+        log.info("get all reservations");
+        return ResponseEntity.ok(reservationService.getAllReservations());
     }
 }

@@ -2,7 +2,10 @@ package com.oteller.hotelservice.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
@@ -16,7 +19,7 @@ import java.util.List;
 @Table(name = "hotels")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class Hotel extends BaseEntity{
+public class Hotel extends BaseEntity {
 
     @NotBlank(message = "Name can not be blank")
     @Column(name = "name", nullable = false, length = 100)

@@ -8,8 +8,11 @@ spring:
     oauth2:
       resource server:
         jwt:
-          issuer-uri: http://localhost:8080
+          issuer-uri: http://localhost:8082
   kafka:
+    topic:
+      room-reserved: room-reserved-events
+      reservation-created: reservation-created-events
     consumer:
       bootstrap-servers: localhost:9092
       group-id: reservation-group

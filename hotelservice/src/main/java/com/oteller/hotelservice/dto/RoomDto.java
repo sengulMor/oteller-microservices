@@ -2,7 +2,6 @@ package com.oteller.hotelservice.dto;
 
 import com.oteller.hotelservice.validation.ConditionalNotBlank;
 import com.oteller.hotelservice.validation.UniqueRoom;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -47,7 +46,6 @@ public class RoomDto {
     private LocalDate checkOutDate;
 
     @NotNull(message = "Hotel is required")
-    @Valid
     private Long hotelId;
 
     private LocalDateTime createdAt;

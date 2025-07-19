@@ -23,7 +23,7 @@ public class HotelController {
 
     @PostMapping
     public ResponseEntity<HotelDto> create(@Valid @RequestBody HotelDto dto) {
-        log.info("hotel {} saved", dto.getName());
+        log.info("hotel {} save", dto.getName());
         return new ResponseEntity<>(hotelService.create(dto), HttpStatus.CREATED);
     }
 
@@ -34,13 +34,13 @@ public class HotelController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HotelDto> getById(@PathVariable("id")  Long id) {
-        log.info("id= {} hotel fetched", id);
+    public ResponseEntity<HotelDto> getById(@PathVariable("id") Long id) {
+        log.info("id= {} hotel fetch", id);
         return ResponseEntity.ok(hotelService.getById(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable("id")  Long id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
         log.info("Deleting hotel with id={}", id);
         hotelService.deleteById(id);
         return ResponseEntity.noContent().build();
