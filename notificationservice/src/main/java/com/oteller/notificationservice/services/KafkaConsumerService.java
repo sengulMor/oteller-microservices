@@ -23,7 +23,7 @@ public class KafkaConsumerService {
         log.info("Sending email for reservation: {}", event.getReservationId());
         String message = "{\"reservationId\":" + event.getReservationId() + ",\"status\":\"CREATED\"}";
         // Simulate extracting user email from message
-        String email = "receiverfakemail@gmail.com"; // Replace with dynamic logic later
+        String email = "senguelmor@gmx.de"; // Replace with dynamic logic later
         emailService.sendReservationConfirmation(email, "Thank you for your reservation!\nDetails:\n" + message);
     }
 }

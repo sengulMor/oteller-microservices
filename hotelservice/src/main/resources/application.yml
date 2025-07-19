@@ -12,7 +12,7 @@ spring:
     oauth2:
       resource-server:
         jwt:
-          issuer-uri: http://localhost:8080
+          issuer-uri: http://localhost:8082
   kafka:
     topic:
       room-reserved: room-reserved-events
@@ -23,7 +23,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/hoteldb
     username: postgres
-    password: mysecretpassword
+    password:
   jpa:
     hibernate:
       ddl-auto: update

@@ -21,7 +21,7 @@ public class EmailService {
         message.setTo(to);
         message.setSubject("Reservation Confirmation");
         message.setText(messageText);
-        message.setFrom("senderfakemail@gmail.com");
+        message.setFrom("senguelmorneu@gmail.com");
 
         try {
             mailSender.send(message);
