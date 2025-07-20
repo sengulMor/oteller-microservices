@@ -13,9 +13,9 @@ public class HotelServiceSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // disable CSRF for development/test
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // ✅ allow all requests to all endpoints
+                        .anyRequest().permitAll()
                 );
 
         return http.build();

@@ -27,7 +27,7 @@ public class ReservationEventListener {
             throw new IllegalArgumentException("Invalid event received, empty fields.");
         }
         String message = getConfirmationMessage(event);
-        emailService.sendReservationConfirmation(event.getEmail(), "Thank you for your reservation!\nDetails:\n" + message);
+        emailService.sendReservationConfirmation(event.getEmail(), message);
         log.info("Email for Reservation is send: {}", event.getReservationId());
     }
 

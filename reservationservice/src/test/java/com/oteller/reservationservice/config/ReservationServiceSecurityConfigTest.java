@@ -1,4 +1,4 @@
-package com.oteller.hotelservice.config;
+package com.oteller.reservationservice.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class SecurityConfigTest {
+class ReservationServiceSecurityConfigTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -19,7 +19,7 @@ class SecurityConfigTest {
 
     @Test
     void shouldAllowAllRequests_whenSecurityIsConfigured() throws Exception {
-        mockMvc.perform(get("/hotels"))  // or any other endpoint
+        mockMvc.perform(get("/reservation"))  // or any other endpoint
                 .andExpect(status().isOk());  // Since all requests are permitted
     }
 }
