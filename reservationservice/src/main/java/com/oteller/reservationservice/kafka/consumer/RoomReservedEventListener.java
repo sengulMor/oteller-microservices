@@ -28,9 +28,8 @@ public class RoomReservedEventListener {
             log.warn("Invalid event received: {}", reservedEvent);
             throw new IllegalArgumentException("Invalid event received, empty fields.");
         }
-
         Long id = reservationService.createReservation(reservedEvent);
-        eventProducer.sendReservationCreatedEvent(id);
+        eventProducer.sendReservationCreatedEvent(id, reservedEvent.getEmail());
         log.info("Reservation created for room: {}", reservedEvent.getRoomId());
     }
 }

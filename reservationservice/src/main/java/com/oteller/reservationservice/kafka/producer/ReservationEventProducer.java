@@ -20,9 +20,9 @@ public class ReservationEventProducer {
         this.kafkaTopicsConfig = kafkaTopicsConfig;
     }
 
-    public void sendReservationCreatedEvent(Long reservationId) {
+    public void sendReservationCreatedEvent(Long reservationId, String email) {
         ReservationCreatedEvent event =
-                new ReservationCreatedEvent(reservationId, ReservationStatus.CONFIRMED);
+                new ReservationCreatedEvent(reservationId, ReservationStatus.CONFIRMED, email);
         kafkaTemplate.send(kafkaTopicsConfig.getReservationCreated(), event);
         log.info("Sent ReservationCreatedEvent for reservationId: {}", reservationId);
     }

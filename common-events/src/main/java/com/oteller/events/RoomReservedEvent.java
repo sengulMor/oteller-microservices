@@ -13,19 +13,21 @@ public class RoomReservedEvent {
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private ReservationStatus status;
+    private String email;
 
-    public RoomReservedEvent() {}
+    public RoomReservedEvent() {
+    }
 
     public RoomReservedEvent(Long hotelId, Long roomId, String guestName, LocalDate checkInDate,
-                             LocalDate checkOutDate, ReservationStatus status) {
+                             LocalDate checkOutDate, ReservationStatus status, String email) {
         this.hotelId = hotelId;
         this.roomId = roomId;
         this.guestName = guestName;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.status = status;
+        this.email = email;
     }
-
 
 
     public Long getHotelId() {
@@ -76,7 +78,12 @@ public class RoomReservedEvent {
         this.status = status;
     }
 
+    public String getEmail() {
+        return email;
+    }
 
-
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
 }

@@ -5,13 +5,13 @@ import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.exception.HotelNotFoundException;
 import com.oteller.hotelservice.exception.RoomNotFoundException;
+import com.oteller.hotelservice.kafka.producer.RoomReservedEventProducer;
 import com.oteller.hotelservice.mapper.RoomMapper;
 import com.oteller.hotelservice.model.Address;
 import com.oteller.hotelservice.model.Hotel;
 import com.oteller.hotelservice.model.Room;
 import com.oteller.hotelservice.repository.HotelRepository;
 import com.oteller.hotelservice.repository.RoomRepository;
-import com.oteller.hotelservice.kafka.producer.KafkaProducer;
 import com.oteller.hotelservice.services.RoomService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class RoomServiceTest {
     private HotelRepository hotelRepository;
 
     @Mock
-    private KafkaProducer kafkaProducer;
+    private RoomReservedEventProducer roomReservedEventProducer;
 
     @Mock
     private RoomMapper roomMapper;
@@ -91,7 +91,7 @@ class RoomServiceTest {
 
     @Test
     void shouldReserveRoomIfAvailable() {
-        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3));
+        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
         Room roomToReserve = new Room("2", 2, new BigDecimal("40.99"), true, "", null, null, hotel);
         roomToReserve.setId(1L);
         Mockito.when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(roomToReserve));
@@ -100,12 +100,12 @@ class RoomServiceTest {
         boolean reserved = roomService.reserveIfAvailable(dto);
 
         assertTrue(reserved);
-        verify(kafkaProducer).sendRoomReservedEvent(any(RoomReservedEvent.class));
+        verify(roomReservedEventProducer).sendRoomReservedEvent(any(RoomReservedEvent.class));
     }
 
     @Test
     void shouldReturnFalse_whenRoomNotAvailable() {
-        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3));
+        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
         room.setAvailable(false);
 
         Mockito.when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(room));
@@ -113,7 +113,7 @@ class RoomServiceTest {
         boolean result = roomService.reserveIfAvailable(dto);
 
         assertFalse(result);
-        verify(kafkaProducer, never()).sendRoomReservedEvent(any());
+        verify(roomReservedEventProducer, never()).sendRoomReservedEvent(any());
     }
 
     @Test

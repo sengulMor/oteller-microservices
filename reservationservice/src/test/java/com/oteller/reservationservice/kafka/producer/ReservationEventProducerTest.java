@@ -37,7 +37,7 @@ class ReservationEventProducerTest {
         when(kafkaTopicsConfig.getReservationCreated()).thenReturn(topic);
 
         // When
-        eventProducer.sendReservationCreatedEvent(reservationId);
+        eventProducer.sendReservationCreatedEvent(reservationId, "johntest@gmail.com");
 
         // Then
         ArgumentCaptor<ReservationCreatedEvent> eventCaptor = ArgumentCaptor.forClass(ReservationCreatedEvent.class);

@@ -39,5 +39,8 @@ public class Reservation extends BaseEntity {
     private LocalDate checkOutDate;
 
     private ReservationStatus status;
+
+    @NotBlank
+    private String email;
 }
 

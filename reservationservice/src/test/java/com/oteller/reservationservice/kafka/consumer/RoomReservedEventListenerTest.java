@@ -35,6 +35,7 @@ class RoomReservedEventListenerTest {
         event.setGuestName("John Doe");
         event.setCheckInDate(LocalDate.now());
         event.setCheckOutDate(LocalDate.now().plusDays(2));
+        event.setEmail("johntest@gmail.com");
 
         when(reservationService.createReservation(event)).thenReturn(123L);
 
@@ -43,7 +44,7 @@ class RoomReservedEventListenerTest {
 
         // Then
         verify(reservationService).createReservation(event);
-        verify(eventProducer).sendReservationCreatedEvent(123L);
+        verify(eventProducer).sendReservationCreatedEvent(123L, "johntest@gmail.com");
     }
 
     @Test

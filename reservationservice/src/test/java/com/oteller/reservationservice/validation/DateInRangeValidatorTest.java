@@ -27,7 +27,7 @@ class DateInRangeValidatorTest {
     void shouldReject_whenCheckOutDateBeforeCheckInDate() throws Exception {
         LocalDate checkInDate = LocalDate.now().plusMonths(1);
         LocalDate checkOutDate = checkInDate.minusDays(5);
-        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, "John", checkInDate, checkOutDate);
+        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, "John", checkInDate, checkOutDate, "johntest@gmail.com");
 
         mockMvc.perform(post("/reservation")
                         .contentType(MediaType.APPLICATION_JSON)

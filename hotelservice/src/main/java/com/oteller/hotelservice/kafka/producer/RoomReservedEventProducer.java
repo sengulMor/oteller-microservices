@@ -3,19 +3,17 @@ package com.oteller.hotelservice.kafka.producer;
 import com.oteller.events.RoomReservedEvent;
 import com.oteller.hotelservice.kafka.config.KafkaTopicsConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class KafkaProducer {
+public class RoomReservedEventProducer {
 
     private final KafkaTemplate<String, RoomReservedEvent> kafkaTemplate;
     private final KafkaTopicsConfig kafkaTopics;
 
-    public KafkaProducer(KafkaTemplate<String, RoomReservedEvent> kafkaTemplate, KafkaTopicsConfig kafkaTopics) {
+    public RoomReservedEventProducer(KafkaTemplate<String, RoomReservedEvent> kafkaTemplate, KafkaTopicsConfig kafkaTopics) {
         this.kafkaTemplate = kafkaTemplate;
         this.kafkaTopics = kafkaTopics;
     }

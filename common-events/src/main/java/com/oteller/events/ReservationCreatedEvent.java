@@ -5,12 +5,15 @@ import com.oteller.enums.ReservationStatus;
 public class ReservationCreatedEvent {
     private Long reservationId;
     private ReservationStatus status;
+    private String email;
 
-    public ReservationCreatedEvent() {}
+    public ReservationCreatedEvent() {
+    }
 
-    public ReservationCreatedEvent(Long reservationId, ReservationStatus status) {
+    public ReservationCreatedEvent(Long reservationId, ReservationStatus status, String email) {
         this.reservationId = reservationId;
         this.status = status;
+        this.email = email;
     }
 
     public Long getReservationId() {
@@ -28,4 +31,13 @@ public class ReservationCreatedEvent {
     public void setStatus(ReservationStatus status) {
         this.status = status;
     }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
 }

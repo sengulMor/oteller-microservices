@@ -3,7 +3,10 @@ package com.oteller.reservationservice.dto;
 import com.oteller.reservationservice.validation.DateInRange;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
@@ -30,4 +33,7 @@ public class ReservationDTO {
 
     @NotNull(message = "Check-Out date is required")
     private LocalDate checkOutDate;
+
+    @NotBlank(message = "Email is required")
+    private String email;
 }

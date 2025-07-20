@@ -1,5 +1,7 @@
 spring:
   kafka:
+    topic:
+      reservation-created: reservation-created-events
     bootstrap-servers: localhost:9092
     consumer:
       group-id: notification-group
@@ -12,7 +14,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: senguelmorneu@gmail.com
+    username: youremail@gmail.com
     password:
     properties:
       mail:
@@ -24,6 +26,3 @@ spring:
             trust: smtp.gmail.com
 server:
   port: 8083
-
-
-

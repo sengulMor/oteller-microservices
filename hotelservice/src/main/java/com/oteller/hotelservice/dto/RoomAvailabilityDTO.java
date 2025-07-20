@@ -29,4 +29,7 @@ public class RoomAvailabilityDTO {
 
     @NotNull(message = "Check-out is required")
     private LocalDate checkOutDate;
+
+    @NotBlank
+    private String email;
 }

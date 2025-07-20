@@ -37,4 +37,8 @@ public class ReservationController {
         log.info("get all reservations");
         return ResponseEntity.ok(reservationService.getAllReservations());
     }
+
+    /*TODO: Implement update reservation endpoint  */
+
+    /*TODO: Implement delete reservation endpoint*/
 }

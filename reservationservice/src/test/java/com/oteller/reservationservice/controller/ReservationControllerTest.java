@@ -38,7 +38,7 @@ class ReservationControllerTest {
         LocalDate checkInDate = LocalDate.now().plusMonths(1);
         LocalDate checkOutDate = checkInDate.plusWeeks(1);
 
-        ReservationDTO requestDto = new ReservationDTO(null, 1L, 5L, "John", checkInDate, checkOutDate);
+        ReservationDTO requestDto = new ReservationDTO(null, 1L, 5L, "John", checkInDate, checkOutDate, "johntest@gmail.com");
         String response = "Reservation successful.";
 
         Mockito.when(reservationService.finishReservation(any())).thenReturn(response);
@@ -54,7 +54,7 @@ class ReservationControllerTest {
     void shouldReturnBadRequest_whenMissingHotelId() throws Exception {
         LocalDate checkInDate = LocalDate.now().plusMonths(1);
         LocalDate checkOutDate = checkInDate.plusWeeks(1);
-        ReservationDTO invalidDto = new ReservationDTO(null, null, 1L, "John", checkInDate, checkOutDate);
+        ReservationDTO invalidDto = new ReservationDTO(null, null, 1L, "John", checkInDate, checkOutDate, "johntest@gmail.com");
 
         mockMvc.perform(post("/reservation")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -67,7 +67,7 @@ class ReservationControllerTest {
     void shouldReturnBadRequest_whenMissingRoomId() throws Exception {
         LocalDate checkInDate = LocalDate.now().plusMonths(1);
         LocalDate checkOutDate = checkInDate.plusWeeks(1);
-        ReservationDTO invalidDto = new ReservationDTO(null, 1L, null, "John", checkInDate, checkOutDate);
+        ReservationDTO invalidDto = new ReservationDTO(null, 1L, null, "John", checkInDate, checkOutDate, "johntest@gmail.com");
 
         mockMvc.perform(post("/reservation")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,7 +80,7 @@ class ReservationControllerTest {
     void shouldReturnBadRequest_whenMissingGuestName() throws Exception {
         LocalDate checkInDate = LocalDate.now().plusMonths(1);
         LocalDate checkOutDate = checkInDate.plusWeeks(1);
-        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, null, checkInDate, checkOutDate);
+        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, null, checkInDate, checkOutDate, "johntest@gmail.com");
 
         mockMvc.perform(post("/reservation")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -91,7 +91,7 @@ class ReservationControllerTest {
 
     @Test
     void shouldReturnBadRequest_whenMissingCheckInDate() throws Exception {
-        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, "John", null, LocalDate.now());
+        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, "John", null, LocalDate.now(), "johntest@gmail.com");
 
         mockMvc.perform(post("/reservation")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +102,7 @@ class ReservationControllerTest {
 
     @Test
     void shouldReturnBadRequest_whenMissingCheckOutDate() throws Exception {
-        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, "John", LocalDate.now(), null);
+        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, "John", LocalDate.now(), null, "johntest@gmail.com");
 
         mockMvc.perform(post("/reservation")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,13 +111,26 @@ class ReservationControllerTest {
                 .andExpect(content().string("Check-Out date is required"));
     }
 
+    @Test
+    void shouldReturnBadRequest_whenMissingEmail() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusMonths(1);
+        LocalDate checkOutDate = checkInDate.plusWeeks(1);
+        ReservationDTO invalidDto = new ReservationDTO(null, 1L, 1L, "John", checkInDate, checkOutDate, null);
+
+        mockMvc.perform(post("/reservation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(invalidDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Email is required"));
+    }
+
 
     @Test
     void shouldReturnReservation_whenValidId() throws Exception {
         Long id = 1L;
         LocalDate checkInDate = LocalDate.now().plusMonths(1);
         LocalDate checkOutDate = checkInDate.plusWeeks(1);
-        ReservationDTO response = new ReservationDTO(id, 1L, 5L, "John", checkInDate, checkOutDate);
+        ReservationDTO response = new ReservationDTO(id, 1L, 5L, "John", checkInDate, checkOutDate, "johntest@gmail.com");
 
         Mockito.when(reservationService.getById(id)).thenReturn(response);
 
