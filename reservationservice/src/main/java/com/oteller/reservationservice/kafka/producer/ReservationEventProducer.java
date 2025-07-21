@@ -11,20 +11,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReservationEventProducer {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, ReservationCreatedEvent> kafkaTemplate;
     private final KafkaTopicsConfig kafkaTopicsConfig;
 
-    public ReservationEventProducer(KafkaTemplate<String, Object> kafkaTemplate,
+    public ReservationEventProducer(KafkaTemplate<String, ReservationCreatedEvent> kafkaTemplate,
                                     KafkaTopicsConfig kafkaTopicsConfig) {
         this.kafkaTemplate = kafkaTemplate;
         this.kafkaTopicsConfig = kafkaTopicsConfig;
     }
 
     public void sendReservationCreatedEvent(Long reservationId, String email) {
-        ReservationCreatedEvent event =
-                new ReservationCreatedEvent(reservationId, ReservationStatus.CONFIRMED, email);
-        kafkaTemplate.send(kafkaTopicsConfig.getReservationCreated(), event);
-        log.info("Sent ReservationCreatedEvent for reservationId: {}", reservationId);
+        log.info("Sending ReservationCreatedEvent to : {}", email);
+
+        ReservationCreatedEvent event = getReservationCreatedEvent(reservationId, email);
+
+        kafkaTemplate.send(kafkaTopicsConfig.getReservationCreated(), event)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        log.info("Sent event=[{}] with offset=[{}]", event, result.getRecordMetadata().offset());
+                    } else {
+                        log.error("Failed to send event=[{}] due to: {}", event, ex.getMessage(), ex);
+                    }
+                });
+    }
+
+    private ReservationCreatedEvent getReservationCreatedEvent(Long reservationId, String email) {
+        return new ReservationCreatedEvent(reservationId, ReservationStatus.CONFIRMED, email);
     }
 }
-

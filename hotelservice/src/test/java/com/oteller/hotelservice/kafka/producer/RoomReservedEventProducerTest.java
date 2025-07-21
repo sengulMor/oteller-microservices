@@ -26,20 +26,38 @@ class RoomReservedEventProducerTest {
 
     @Test
     void testSendRoomReservedEvent_success() {
-        // Given
-        RoomReservedEvent event = new RoomReservedEvent();
-        event.setRoomId(1L);
-        event.setHotelId(10L);
-
-        when(kafkaTopicsConfig.getRoomReserved()).thenReturn("room-reserved-topic");
+        RoomReservedEvent event = getRoomReservedEvent();
+        String topic = "room-reserved-topic";
+        when(kafkaTopicsConfig.getRoomReserved()).thenReturn(topic);
         when(kafkaTemplate.send(anyString(), any(RoomReservedEvent.class)))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
-        // When
         roomReservedEventProducer.sendRoomReservedEvent(event);
 
-        // Then
+        verify(kafkaTopicsConfig, times(1)).getRoomReserved();
+        verify(kafkaTemplate, times(1)).send(topic, event);
+    }
+
+
+    @Test
+    void testSendRoomReservedEvent_exception() {
+        RoomReservedEvent event = getRoomReservedEvent();
+        String topic = "room-reserved-topic";
+        when(kafkaTopicsConfig.getRoomReserved()).thenReturn(topic);
+        when(kafkaTemplate.send(topic, event))
+                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Simulated Exception")));
+
+        roomReservedEventProducer.sendRoomReservedEvent(event);
+
         verify(kafkaTopicsConfig, times(1)).getRoomReserved();
         verify(kafkaTemplate, times(1)).send("room-reserved-topic", event);
     }
+
+    private RoomReservedEvent getRoomReservedEvent() {
+        RoomReservedEvent event = new RoomReservedEvent();
+        event.setRoomId(1L);
+        event.setHotelId(10L);
+        return event;
+    }
 }
+
