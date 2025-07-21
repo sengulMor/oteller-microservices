@@ -60,7 +60,8 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Hotel Id is required"));
+                .andExpect(jsonPath("$[0].field").value("hotelId"))
+                .andExpect(jsonPath("$[0].message").value("Hotel Id is required"));
     }
 
     @Test
@@ -73,7 +74,8 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Room Id is required"));
+                .andExpect(jsonPath("$[0].field").value("roomId"))
+                .andExpect(jsonPath("$[0].message").value("Room Id is required"));
     }
 
     @Test
@@ -86,7 +88,8 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Guest name is required"));
+                .andExpect(jsonPath("$[0].field").value("guestName"))
+                .andExpect(jsonPath("$[0].message").value("Guest name is required"));
     }
 
     @Test
@@ -97,7 +100,8 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Check-In date is required"));
+                .andExpect(jsonPath("$[0].field").value("checkInDate"))
+                .andExpect(jsonPath("$[0].message").value("Check-In date is required"));
     }
 
     @Test
@@ -108,7 +112,8 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Check-Out date is required"));
+                .andExpect(jsonPath("$[0].field").value("checkOutDate"))
+                .andExpect(jsonPath("$[0].message").value("Check-Out date is required"));
     }
 
     @Test
@@ -121,7 +126,9 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Email is required"));
+                .andExpect(jsonPath("$[0].field").value("email"))
+                .andExpect(jsonPath("$[0].message").value("Email is required"));
+
     }
 
 

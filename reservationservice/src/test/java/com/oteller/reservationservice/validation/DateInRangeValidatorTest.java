@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -33,7 +33,10 @@ class DateInRangeValidatorTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Check-In date must be before Check-Out Date."));
+                .andExpect(jsonPath("$[0].field").value("checkInDate"))
+                .andExpect(jsonPath("$[0].message").value("Check-In date must be before Check-Out Date."));
+
+
     }
 
     private static String asJsonString(Object obj) {
