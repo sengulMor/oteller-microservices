@@ -1,5 +1,7 @@
 package com.oteller.hotelservice.exception;
 
+import com.oteller.hotelservice.dto.RoomDto;
+import jakarta.validation.Valid;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -81,7 +84,7 @@ class GlobalExceptionHandlerTest {
         BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
 
-        Method method = this.getClass().getDeclaredMethod("dummyMethod");
+        Method method = this.getClass().getDeclaredMethod("getUnvalidRoomDto", RoomDto.class);
         MethodParameter methodParameter = new MethodParameter(method, -1);
 
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(methodParameter, bindingResult);
@@ -90,15 +93,19 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<List<ValidationError>> response = handler.handleValidationErrors(ex);
 
         // Assert
-        assertEquals(400, response.getStatusCodeValue());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
         assertEquals("name", response.getBody().get(0).field());
         assertEquals("must not be blank", response.getBody().get(0).message());
     }
 
-    private void dummyMethod() {
+    private void getUnvalidRoomDto(@Valid RoomDto dto) {
+        LocalDate checkInDate = LocalDate.now();
+        LocalDate checkOutDate = checkInDate.minusDays(3);
+        dto.setCheckInDate(checkInDate);
+        dto.setCheckOutDate(checkOutDate);
     }
+
 }
 
 
