@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class ReservationTransactionalServiceTest {
+class ReservationTransactionalServiceTest {
 
     private ReservationTransactionalService reservationTransactionalService;
     private ReservationRepository reservationRepository;
