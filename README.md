@@ -1,27 +1,43 @@
-# Hotel Service - Oteller Microservices Project
+# Oteller Microservices Project
 
-This is the **Hotel Service** of the Oteller Microservices architecture. It is responsible for managing hotel-related operations such as adding hotels, managing rooms, and checking availability.
+**Oteller Microservices** is a distributed hotel reservation system composed of several independently deployable
+services. It allows hotel registration, room management, and room reservation, and uses Kafka for asynchronous
+communication between services.
+
+## Microservices
+
+The system includes the following services:
+
+- **API Gateway** – Central entry point for routing requests to services
+- **Hotel Service** – Manages hotels and their rooms
+- **Reservation Service** – Handles reservation creation and lookup
+- **Notification Service** – Listens for reservation events and sends notifications
+
+Additionally, there's a shared library:
+
+- **common-events** – Contains reusable DTOs and event classes for Kafka communication
 
 ## Features
 
 - Register new hotels
-- Add rooms to hotels
+- Add and manage hotel rooms
 - Check room availability
-- Room validation with custom annotations
-- Kafka integration for event-based communication (e.g., room reservation events)
-- RESTful API with Spring Boot
+- Create and manage reservations
+- Kafka-based event-driven communication
+- Room and reservation validation using custom annotations
+- RESTful APIs using Spring Boot
 - Exception handling with meaningful responses
-- Unit and integration tests with JUnit and Mockito
+- Unit testing with JUnit and Mockito
 
 ## Tech Stack
 
 - Java 17
 - Spring Boot
 - Maven
-- Kafka (for asynchronous event communication)
-- JPA/Hibernate
+- Apache Kafka
 - PostgreSQL
-- Docker (optional)
+- JPA / Hibernate
+- Docker (optional for local deployment)
 - Lombok
 - MapStruct
 
@@ -29,14 +45,49 @@ This is the **Hotel Service** of the Oteller Microservices architecture. It is r
 
 ### Prerequisites
 
-- Java 17+
+- Java 17 or higher
 - Maven
-- PostgreSQL (or use Docker to spin up a container)
-- Kafka (for full functionality, including event production)
+- PostgreSQL
+- Kafka (for asynchronous messaging)
+- Docker (optional, for running PostgreSQL/Kafka locally)
 
 ### Running the Application
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/oteller-microservices.git
-   cd hotelservice
+   cd oteller-microservices
+   ```
+2. Navigate to a service directory (e.g., `cd reservationservice`), configure `application.yml`, and run:
+   ```bash
+   mvn spring-boot:run
+   ```
+
+3. Use Docker Compose to start SonarQube, Kafka, and PostgreSQL:
+   ```bash
+   docker-compose up -d
+   ```
+
+Each service runs independently. Ensure the dependent services (like Kafka or PostgreSQL) are running before starting
+services that rely on them.
+
+## Project Structure
+
+<pre>  
+      oteller-microservices/ 
+      ├── apigateway/ 
+      ├── hotelservice/ 
+      ├── reservationservice/ 
+      ├── notificationservice/ 
+      ├── common-events/ 
+      ├── docker-compose.yml 
+      └── README.md 
+</pre>
+
+## Future Improvements
+
+- Authentication and authorization (e.g., Keycloak or OAuth2)
+- API documentation with Swagger / OpenAPI
+- Centralized configuration (e.g., Spring Cloud Config)
+- Tracing and monitoring (e.g., Zipkin, Prometheus, Grafana)
+
