@@ -18,17 +18,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RoomServiceTest {
@@ -70,10 +69,10 @@ class RoomServiceTest {
 
     @Test
     void shouldCreateRoomSuccessfully() {
-        Mockito.when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
-        Mockito.when(roomMapper.toEntity(roomDto, hotel)).thenReturn(room);
-        Mockito.when(roomRepository.save(room)).thenReturn(room);
-        Mockito.when(roomMapper.toDto(room)).thenReturn(roomDto);
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+        when(roomMapper.toEntity(roomDto, hotel)).thenReturn(room);
+        when(roomRepository.save(room)).thenReturn(room);
+        when(roomMapper.toDto(room)).thenReturn(roomDto);
 
         RoomDto result = roomService.create(roomDto);
 
@@ -84,9 +83,15 @@ class RoomServiceTest {
 
     @Test
     void shouldThrowHotelNotFoundException_whenHotelDoesNotExist() {
-        Mockito.when(hotelRepository.findById(hotelId)).thenReturn(Optional.empty());
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.empty());
 
         assertThrows(HotelNotFoundException.class, () -> roomService.create(roomDto));
+    }
+
+    @Test
+    void shouldThrowRoomNotFoundException_whenNoRoomsExistForHotel() {
+        when(roomRepository.findAllByHotelId(hotelId)).thenReturn(Collections.emptyList());
+        assertThrows(RoomNotFoundException.class, () -> roomService.getAllRoomsOfHotel(hotelId));
     }
 
     @Test
@@ -94,8 +99,8 @@ class RoomServiceTest {
         RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
         Room roomToReserve = new Room("2", 2, new BigDecimal("40.99"), true, "", null, null, hotel);
         roomToReserve.setId(1L);
-        Mockito.when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(roomToReserve));
-        Mockito.when(roomRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(roomToReserve));
+        when(roomRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         boolean reserved = roomService.reserveIfAvailable(dto);
 
@@ -108,7 +113,7 @@ class RoomServiceTest {
         RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
         room.setAvailable(false);
 
-        Mockito.when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(room));
+        when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(room));
 
         boolean result = roomService.reserveIfAvailable(dto);
 
@@ -118,8 +123,8 @@ class RoomServiceTest {
 
     @Test
     void shouldReturnRoomById() {
-        Mockito.when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
-        Mockito.when(roomMapper.toDto(room)).thenReturn(roomDto);
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomMapper.toDto(room)).thenReturn(roomDto);
 
         RoomDto result = roomService.getById(1L);
 
@@ -128,17 +133,52 @@ class RoomServiceTest {
 
     @Test
     void shouldThrowRoomNotFoundException_whenRoomNotFound() {
-        Mockito.when(roomRepository.findById(1L)).thenReturn(Optional.empty());
+        when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(RoomNotFoundException.class, () -> roomService.getById(1L));
     }
 
     @Test
     void shouldDeleteRoomSuccessfully() {
-        Mockito.when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
         roomService.deleteById(1L);
         verify(roomRepository).delete(room);
     }
 
+    @Test
+    void shouldUpdateRoomSuccessfully() {
+        // Given
+        Long roomId = 1L;
+        RoomDto dto = new RoomDto();
+        dto.setId(roomId);
+        dto.setHotelId(hotelId);
+
+        Room updatedRoom = new Room();
+
+        when(roomRepository.findByIdAndHotel_Id(roomId, hotelId)).thenReturn(Optional.of(room));
+        doNothing().when(roomMapper).update(room, dto);
+        when(roomRepository.save(room)).thenReturn(updatedRoom);
+        when(roomMapper.toDto(updatedRoom)).thenReturn(roomDto);
+
+        // When
+        RoomDto result = roomService.update(dto);
+
+        // Then
+        assertEquals(roomDto, result);
+        verify(roomRepository).findByIdAndHotel_Id(roomId, hotelId);
+        verify(roomMapper).update(room, dto);
+        verify(roomRepository).save(room);
+        verify(roomMapper).toDto(updatedRoom);
+    }
+
+    @Test
+    void shouldThrowRoomNotFoundException_whenRoomNotExists() {
+        Long roomId = 1L;
+        when(roomRepository.findByIdAndHotel_Id(roomId, hotelId)).thenReturn(Optional.empty());
+
+        assertThrows(RoomNotFoundException.class, () -> roomService.update(roomDto));
+        verify(roomRepository).findByIdAndHotel_Id(roomId, hotelId);
+        verifyNoMoreInteractions(roomMapper, roomRepository);
+    }
 
 }

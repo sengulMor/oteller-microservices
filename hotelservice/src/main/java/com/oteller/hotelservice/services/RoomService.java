@@ -56,7 +56,7 @@ public class RoomService {
     public List<RoomDto> getAllRoomsOfHotel(Long hotelId) {
         List<Room> rooms = roomRepository.findAllByHotelId(hotelId);
         if (rooms.isEmpty()) {
-            throw new HotelNotFoundException(hotelId);
+            throw new RoomNotFoundException(hotelId);
         }
         return roomMapper.toDtoList(rooms);
     }
