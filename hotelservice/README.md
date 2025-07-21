@@ -1,6 +1,8 @@
 # Hotel Service - Oteller Microservices Project
 
-This is the **Hotel Service** of the Oteller Microservices architecture. It is responsible for managing hotel-related operations such as adding hotels, managing rooms, and checking availability.
+The **Hotel Service** is part of the *Oteller Microservices Architecture*.
+It is responsible for managing hotel-related operations such as adding hotels, managing rooms, and checking
+availability.
 
 ## Features
 
@@ -11,7 +13,7 @@ This is the **Hotel Service** of the Oteller Microservices architecture. It is r
 - Kafka integration for event-based communication (e.g., room reservation events)
 - RESTful API with Spring Boot
 - Exception handling with meaningful responses
-- Unit and integration tests with JUnit and Mockito
+- Unit with JUnit and Mockito
 
 ## Tech Stack
 
@@ -40,3 +42,29 @@ This is the **Hotel Service** of the Oteller Microservices architecture. It is r
    ```bash
    git clone https://github.com/yourusername/oteller-microservices.git
    cd hotelservice
+   ```
+
+2. Configure the database connection in `src/main/resources/application.yml`:
+
+   ```yaml
+   spring:
+      datasource:
+      url: jdbc:postgresql://localhost:5432/hoteldb
+      username: postgres
+      password: yourpassword
+      jpa:
+         hibernate:
+            ddl-auto: update
+         show-sql: true
+         properties:
+            hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+   
+   kafka:
+     bootstrap-servers: localhost:9092
+     topic:
+       room-reserved: room-reserved-events
+   ```
+
+3. Start the application:
+   ```bash
+   mvn spring-boot:run

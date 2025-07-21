@@ -1,6 +1,6 @@
 # Gateway-service - Oteller Microservices Project
 
-This is the **Gateway-service** of the Oteller Microservices architecture.
+The **Gateway Service** is part of the *Oteller Microservices Architecture*.
 API Gateway acts as a single entry point to the system. It is responsible for routing incoming requests to the
 appropriate microservices.
 
@@ -28,4 +28,8 @@ appropriate microservices.
    ```bash
    git clone https://github.com/yourusername/oteller-microservices.git
    cd apigateway
+   ```
+
+2. Start the application:
+   ```bash
    mvn spring-boot:run
