@@ -7,7 +7,6 @@ import com.oteller.hotelservice.mapper.HotelMapper;
 import com.oteller.hotelservice.model.Hotel;
 import com.oteller.hotelservice.repository.HotelRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,24 +20,16 @@ public class HotelService {
     private final HotelRepository hotelRepository;
     private final HotelMapper hotelMapper;
 
-    public HotelService(HotelRepository hotelRepository, HotelMapper hotelMapper){
+    public HotelService(HotelRepository hotelRepository, HotelMapper hotelMapper) {
         this.hotelRepository = hotelRepository;
         this.hotelMapper = hotelMapper;
     }
 
     @Transactional
-    public HotelDto create(HotelDto dto) throws RuntimeException {
-        try {
-            Hotel hotel = hotelMapper.toEntity(dto);
-            Hotel savedHotel = hotelRepository.save(hotel);
-            return hotelMapper.toDto(savedHotel);
-        } catch (DataIntegrityViolationException ex) {
-            log.error("DataIntegrityViolationException in HotelService", ex);
-            throw new DataIntegrityViolationException("Hotel could not be saved: " + ex.getMessage(), ex);
-        } catch (Exception ex) {
-            log.error("Exception in HotelService", ex);
-            throw new RuntimeException("Unexpected error while saving hotel", ex);
-        }
+    public HotelDto create(HotelDto dto) {
+        Hotel hotel = hotelMapper.toEntity(dto);
+        Hotel savedHotel = hotelRepository.save(hotel);
+        return hotelMapper.toDto(savedHotel);
     }
 
     @Transactional(readOnly = true)
@@ -47,13 +38,14 @@ public class HotelService {
     }
 
     @Transactional(readOnly = true)
-    public HotelDto getById(Long id){
+    public HotelDto getById(Long id) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new HotelNotFoundException(id));
         return hotelMapper.toDto(hotel);
     }
+
     @Transactional
-    public void deleteById(Long id){
+    public void deleteById(Long id) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new HotelNotFoundException(id));
         hotelRepository.delete(hotel);

@@ -9,6 +9,7 @@ import com.oteller.hotelservice.repository.HotelRepository;
 import com.oteller.hotelservice.services.HotelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
@@ -53,21 +54,32 @@ class HotelServiceTest {
         Hotel hotel = new Hotel();
 
         when(hotelMapper.toEntity(dto)).thenReturn(hotel);
-        when(hotelRepository.save(hotel)).thenThrow(new DataIntegrityViolationException("Unique constraint failed"));
+        when(hotelRepository.save(hotel)).thenThrow(new DataIntegrityViolationException("Data integrity violation"));
 
-        assertThrows(DataIntegrityViolationException.class, () -> hotelService.create(dto));
+        RuntimeException exception = assertThrows(DataIntegrityViolationException.class, () -> hotelService.create(dto));
+        assertTrue(exception.getMessage().contains("Data integrity violation"));
     }
 
     @Test
-    void create_shouldThrowRuntimeException_forUnexpectedException() {
+    void create_shouldThrowCannotAcquireLockException() {
         HotelDto dto = getHotelDto();
         Hotel hotel = new Hotel();
-
         when(hotelMapper.toEntity(dto)).thenReturn(hotel);
-        when(hotelRepository.save(hotel)).thenThrow(new RuntimeException("Database down"));
+        when(hotelRepository.save(any())).thenThrow(new CannotAcquireLockException("Database error"));
+
+        RuntimeException exception = assertThrows(CannotAcquireLockException.class, () -> hotelService.create(dto));
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void create_shouldThrowERuntimeException() {
+        HotelDto dto = getHotelDto();
+        Hotel hotel = new Hotel();
+        when(hotelMapper.toEntity(dto)).thenReturn(hotel);
+        when(hotelRepository.save(any())).thenThrow(new RuntimeException("Unexpected error occurred"));
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> hotelService.create(dto));
-        assertTrue(exception.getMessage().contains("Unexpected error"));
+        assertTrue(exception.getMessage().contains("Unexpected error occurred"));
     }
 
     @Test

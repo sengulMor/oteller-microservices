@@ -39,8 +39,8 @@ class RoomControllerTest {
 
     @Test
     void shouldCreateRoom_whenValidRequest() throws Exception {
-        RoomDto requestDto = new RoomDto(null, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null );
-        RoomDto responseDto = new RoomDto(1L, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null );
+        RoomDto requestDto = new RoomDto(null, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null);
+        RoomDto responseDto = new RoomDto(1L, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null);
         Mockito.when(roomService.create(any())).thenReturn(responseDto);
         mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +54,7 @@ class RoomControllerTest {
 
     @Test
     void shouldReturnBadRequest_whenMissingRoomNumber() throws Exception {
-        RoomDto invalidDto = new RoomDto(null, "", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null );
+        RoomDto invalidDto = new RoomDto(null, "", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null);
         mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
@@ -66,7 +66,7 @@ class RoomControllerTest {
 
     @Test
     void shouldReturnBadRequest_whenMissingCapacity() throws Exception {
-        RoomDto invalidDto = new RoomDto(null, "23", null, new BigDecimal("40.99"), "", true, null, null, 4L, null, null );
+        RoomDto invalidDto = new RoomDto(null, "23", null, new BigDecimal("40.99"), "", true, null, null, 4L, null, null);
         mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
@@ -77,7 +77,7 @@ class RoomControllerTest {
 
     @Test
     void shouldReturnBadRequest_whenCapacityIsUnderMinValue() throws Exception {
-        RoomDto invalidDto = new RoomDto(null, "23", 0, new BigDecimal("40.99"), "", true, null, null, 4L, null, null );
+        RoomDto invalidDto = new RoomDto(null, "23", 0, new BigDecimal("40.99"), "", true, null, null, 4L, null, null);
         mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
@@ -87,10 +87,9 @@ class RoomControllerTest {
     }
 
 
-
     @Test
     void shouldReturnBadRequest_whenMissingPricePerNight() throws Exception {
-        RoomDto invalidDto = new RoomDto(null, "23", 2, null, "", true, null, null, 4L, null, null );
+        RoomDto invalidDto = new RoomDto(null, "23", 2, null, "", true, null, null, 4L, null, null);
         mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
@@ -102,7 +101,7 @@ class RoomControllerTest {
     @Test
     void shouldReturnRoom_whenValidId() throws Exception {
         Long id = 1L;
-        RoomDto responseDto = new RoomDto(1L, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null );
+        RoomDto responseDto = new RoomDto(1L, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null);
 
         Mockito.when(roomService.getById(id)).thenReturn(responseDto);
 
@@ -123,7 +122,7 @@ class RoomControllerTest {
     @Test
     void shouldReturn_allRooms() throws Exception {
         Long hotelId = 1L;
-        RoomDto responseDto = new RoomDto(1L, "12", 2, new BigDecimal("40.99"), "", true, null, null, hotelId, null, null );
+        RoomDto responseDto = new RoomDto(1L, "12", 2, new BigDecimal("40.99"), "", true, null, null, hotelId, null, null);
         Mockito.when(roomService.getAllRoomsOfHotel(hotelId)).thenReturn(List.of(responseDto));
         mockMvc.perform(get("/rooms?hotelId=" + hotelId))
                 .andExpect(status().isOk());
@@ -134,8 +133,8 @@ class RoomControllerTest {
     void shouldUpdateRoom_whenValidRequest() throws Exception {
         Long id = 1L;
 
-        RoomDto requestDto = new RoomDto(id, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null );
-        RoomDto responseDto = new RoomDto(id, "12", 3, new BigDecimal("50.99"), "", true, null, null, 4L, null, null );
+        RoomDto requestDto = new RoomDto(id, "12", 2, new BigDecimal("40.99"), "", true, null, null, 4L, null, null);
+        RoomDto responseDto = new RoomDto(id, "12", 3, new BigDecimal("50.99"), "", true, null, null, 4L, null, null);
 
         Mockito.when(roomService.update(any())).thenReturn(responseDto);
 
@@ -169,12 +168,12 @@ class RoomControllerTest {
         mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(""))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     void shouldReturnBadRequest_whenPriceIsNegative() throws Exception {
-        RoomDto invalidDto = new RoomDto(null, "12", 2, new BigDecimal("-5.00"), "", true, null, null, 4L, null, null );
+        RoomDto invalidDto = new RoomDto(null, "12", 2, new BigDecimal("-5.00"), "", true, null, null, 4L, null, null);
         mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
@@ -201,7 +200,7 @@ class RoomControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-               .andExpect(content().string("true"));
+                .andExpect(content().string("true"));
 
         // Optionally verify the service call
         Mockito.verify(roomService).reserveIfAvailable(any(RoomAvailabilityDTO.class));

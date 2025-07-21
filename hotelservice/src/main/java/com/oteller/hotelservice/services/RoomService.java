@@ -13,7 +13,6 @@ import com.oteller.hotelservice.model.Room;
 import com.oteller.hotelservice.repository.HotelRepository;
 import com.oteller.hotelservice.repository.RoomRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,17 +39,10 @@ public class RoomService {
     public RoomDto create(RoomDto roomDto) {
         Hotel hotel = hotelRepository.findById(roomDto.getHotelId())
                 .orElseThrow(() -> new HotelNotFoundException(roomDto.getHotelId()));
-        try {
-            Room room = roomMapper.toEntity(roomDto, hotel);
-            Room savedRoom = roomRepository.save(room);
-            return roomMapper.toDto(savedRoom);
-        } catch (DataIntegrityViolationException ex) {
-            log.error("DataIntegrityViolationException in RoomService", ex);
-            throw new DataIntegrityViolationException("Room could not be saved: " + ex.getMessage(), ex);
-        } catch (Exception ex) {
-            log.error("Exception in RoomService", ex);
-            throw new RuntimeException("Unexpected error while saving room", ex);
-        }
+
+        Room room = roomMapper.toEntity(roomDto, hotel);
+        Room savedRoom = roomRepository.save(room);
+        return roomMapper.toDto(savedRoom);
     }
 
     @Transactional(readOnly = true)
