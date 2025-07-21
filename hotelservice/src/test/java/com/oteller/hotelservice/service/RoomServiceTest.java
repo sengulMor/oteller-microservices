@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,6 +93,15 @@ class RoomServiceTest {
     void shouldThrowRoomNotFoundException_whenNoRoomsExistForHotel() {
         when(roomRepository.findAllByHotelId(hotelId)).thenReturn(Collections.emptyList());
         assertThrows(RoomNotFoundException.class, () -> roomService.getAllRoomsOfHotel(hotelId));
+    }
+
+    @Test
+    void shouldReturnAllRoomsOfHotel_success() {
+        List<Room> rooms = List.of(room);
+        when(roomRepository.findAllByHotelId(hotelId)).thenReturn(rooms);
+        when(roomMapper.toDtoList(rooms)).thenReturn(List.of(roomDto));
+        List<RoomDto> result = roomService.getAllRoomsOfHotel(hotelId);
+        assertEquals(roomDto.getRoomNumber(), result.get(0).getRoomNumber());
     }
 
     @Test
