@@ -1,6 +1,6 @@
 package com.oteller.hotelservice.controller;
 
-import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
+import com.oteller.hotelservice.dto.RoomAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.services.RoomService;
 import jakarta.validation.Valid;
@@ -23,13 +23,13 @@ public class RoomController {
     }
 
     @PostMapping
-    public ResponseEntity<RoomDto>  create(@Valid @RequestBody RoomDto roomDto) {
+    public ResponseEntity<RoomDto> create(@Valid @RequestBody RoomDto roomDto) {
         log.info("room {} saved", roomDto.getRoomNumber());
         return new ResponseEntity<>(roomService.create(roomDto), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RoomDto> getById(@PathVariable("id")  Long id) {
+    public ResponseEntity<RoomDto> getById(@PathVariable("id") Long id) {
         log.info("id= {} room fetched", id);
         return ResponseEntity.ok(roomService.getById(id));
     }
@@ -41,7 +41,7 @@ public class RoomController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable("id")  Long id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
         log.info("Deleting room with id={}", id);
         roomService.deleteById(id);
         return ResponseEntity.noContent().build();
@@ -54,7 +54,7 @@ public class RoomController {
     }
 
     @PostMapping("/check-availability")
-    public ResponseEntity<Boolean> checkAvailability(@RequestBody RoomAvailabilityDTO dto) {
+    public ResponseEntity<Boolean> checkAvailability(@RequestBody RoomAvailabilityDto dto) {
         log.info("Check availability for room with id={}", dto.getRoomId());
         return ResponseEntity.ok(roomService.reserveIfAvailable(dto));
     }

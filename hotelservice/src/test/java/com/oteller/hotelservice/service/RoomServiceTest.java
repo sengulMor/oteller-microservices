@@ -1,7 +1,7 @@
 package com.oteller.hotelservice.service;
 
 import com.oteller.events.RoomReservedEvent;
-import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
+import com.oteller.hotelservice.dto.RoomAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.exception.HotelNotFoundException;
 import com.oteller.hotelservice.exception.RoomNotFoundException;
@@ -106,7 +106,7 @@ class RoomServiceTest {
 
     @Test
     void shouldReserveRoomIfAvailable() {
-        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
+        RoomAvailabilityDto dto = new RoomAvailabilityDto(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
         Room roomToReserve = new Room("2", 2, new BigDecimal("40.99"), true, "", null, null, hotel);
         roomToReserve.setId(1L);
         when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(roomToReserve));
@@ -120,7 +120,7 @@ class RoomServiceTest {
 
     @Test
     void shouldReturnFalse_whenRoomNotAvailable() {
-        RoomAvailabilityDTO dto = new RoomAvailabilityDTO(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
+        RoomAvailabilityDto dto = new RoomAvailabilityDto(1L, 1L, "John", LocalDate.now(), LocalDate.now().plusDays(3), "johntest@gmail.com");
         room.setAvailable(false);
 
         when(roomRepository.findRoomForUpdate(1L, 1L)).thenReturn(Optional.of(room));

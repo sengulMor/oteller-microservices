@@ -2,7 +2,7 @@ package com.oteller.hotelservice.services;
 
 import com.oteller.enums.ReservationStatus;
 import com.oteller.events.RoomReservedEvent;
-import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
+import com.oteller.hotelservice.dto.RoomAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.exception.HotelNotFoundException;
 import com.oteller.hotelservice.exception.RoomNotFoundException;
@@ -92,7 +92,7 @@ public class RoomService {
 
 
     @Transactional
-    public boolean reserveIfAvailable(RoomAvailabilityDTO dto) {
+    public boolean reserveIfAvailable(RoomAvailabilityDto dto) {
         Room room = roomRepository.findRoomForUpdate(dto.getRoomId(), dto.getHotelId())
                 .orElseThrow(() -> new RoomNotFoundException(dto.getRoomId()));
         if (!room.isAvailable()) {
@@ -103,7 +103,7 @@ public class RoomService {
         return true;
     }
 
-    private void reserveRoom(RoomAvailabilityDTO dto, Room room) {
+    private void reserveRoom(RoomAvailabilityDto dto, Room room) {
         room.setAvailable(false);
         room.setGuestName(dto.getGuestName());
         room.setCheckInDate(dto.getCheckInDate());
@@ -111,12 +111,12 @@ public class RoomService {
         roomRepository.save(room);
     }
 
-    private void sendEvent(RoomAvailabilityDTO dto) {
+    private void sendEvent(RoomAvailabilityDto dto) {
         RoomReservedEvent event = getRoomReservedEvent(dto);
         roomReservedEventProducer.sendRoomReservedEvent(event);
     }
 
-    private RoomReservedEvent getRoomReservedEvent(RoomAvailabilityDTO dto) {
+    private RoomReservedEvent getRoomReservedEvent(RoomAvailabilityDto dto) {
         return new RoomReservedEvent(dto.getHotelId(), dto.getRoomId(),
                 dto.getGuestName(), dto.getCheckInDate(), dto.getCheckOutDate(), ReservationStatus.CONFIRMED, dto.getEmail());
     }

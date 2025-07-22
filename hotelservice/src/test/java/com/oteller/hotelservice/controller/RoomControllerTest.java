@@ -1,7 +1,7 @@
 package com.oteller.hotelservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oteller.hotelservice.dto.RoomAvailabilityDTO;
+import com.oteller.hotelservice.dto.RoomAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.exception.RoomNotFoundException;
 import com.oteller.hotelservice.services.RoomService;
@@ -185,7 +185,7 @@ class RoomControllerTest {
     @Test
     void checkAvailability_shouldReturnTrue_whenRoomIsAvailable() throws Exception {
         // Arrange
-        RoomAvailabilityDTO dto = RoomAvailabilityDTO.builder()
+        RoomAvailabilityDto dto = RoomAvailabilityDto.builder()
                 .roomId(1L)
                 .hotelId(1L)
                 .guestName("Alice")
@@ -193,7 +193,7 @@ class RoomControllerTest {
                 .checkOutDate(LocalDate.of(2025, 7, 25))
                 .build();
 
-        Mockito.when(roomService.reserveIfAvailable(any(RoomAvailabilityDTO.class))).thenReturn(true);
+        Mockito.when(roomService.reserveIfAvailable(any(RoomAvailabilityDto.class))).thenReturn(true);
 
         // Act & Assert
         mockMvc.perform(post("/rooms/check-availability")
@@ -203,12 +203,12 @@ class RoomControllerTest {
                 .andExpect(content().string("true"));
 
         // Optionally verify the service call
-        Mockito.verify(roomService).reserveIfAvailable(any(RoomAvailabilityDTO.class));
+        Mockito.verify(roomService).reserveIfAvailable(any(RoomAvailabilityDto.class));
     }
 
     @Test
     void checkAvailability_shouldReturnFalse_whenRoomIsNotAvailable() throws Exception {
-        RoomAvailabilityDTO dto = RoomAvailabilityDTO.builder()
+        RoomAvailabilityDto dto = RoomAvailabilityDto.builder()
                 .roomId(2L)
                 .hotelId(1L)
                 .guestName("Bob")
@@ -216,7 +216,7 @@ class RoomControllerTest {
                 .checkOutDate(LocalDate.of(2025, 8, 5))
                 .build();
 
-        Mockito.when(roomService.reserveIfAvailable(any(RoomAvailabilityDTO.class))).thenReturn(false);
+        Mockito.when(roomService.reserveIfAvailable(any(RoomAvailabilityDto.class))).thenReturn(false);
 
         mockMvc.perform(post("/rooms/check-availability")
                         .contentType(MediaType.APPLICATION_JSON)

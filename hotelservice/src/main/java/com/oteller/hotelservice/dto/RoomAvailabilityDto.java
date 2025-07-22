@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoomAvailabilityDTO {
+public class RoomAvailabilityDto {
 
     @NotNull(message = "Hotel Id is required")
     private Long hotelId;
