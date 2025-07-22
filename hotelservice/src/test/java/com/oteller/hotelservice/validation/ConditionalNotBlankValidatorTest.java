@@ -13,12 +13,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc(addFilters = false)
 @SpringBootTest
-class ConditionalNotBlankValidationTest {
+class ConditionalNotBlankValidatorTest {
 
     public static final String GUEST_NAME_IS_REQUIRED_WHEN_ROOM_IS_NOT_AVAILABLE = "Guest name is required when room is not available";
     public static final String CHECK_IN_DATE_IS_REQUIRED_WHEN_ROOM_IS_NOT_AVAILABLE = "Check-in date is required when room is not available";
@@ -45,7 +46,7 @@ class ConditionalNotBlankValidationTest {
     }
 
     @Test
-    void shouldReject_whenUnavailableRoom_missingGuestAndDates() throws Exception {
+    void shouldReject_whenUnavailableRoom_missingGuestNameAndDates() throws Exception {
         RoomDto invalid = new RoomDto();
         invalid.setAvailable(false);
         invalid.setGuestName(null);
@@ -62,6 +63,63 @@ class ConditionalNotBlankValidationTest {
                         .value(CHECK_IN_DATE_IS_REQUIRED_WHEN_ROOM_IS_NOT_AVAILABLE))
                 .andExpect(jsonPath("$[?(@.field=='checkOutDate')].message")
                         .value(CHECK_OUT_DATE_IS_REQUIRED_WHEN_ROOM_IS_NOT_AVAILABLE));
+    }
+
+    @Test
+    void shouldReject_whenUnavailableRoom_missingGuestName() throws Exception {
+        RoomDto invalid = new RoomDto();
+        invalid.setAvailable(false);
+        invalid.setGuestName(null);
+        invalid.setCheckInDate(LocalDate.now().plusDays(3));
+        invalid.setCheckOutDate(LocalDate.now().plusDays(6));
+
+        mockMvc.perform(post("/rooms")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJson(invalid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[?(@.field=='guestName')].message")
+                        .value(GUEST_NAME_IS_REQUIRED_WHEN_ROOM_IS_NOT_AVAILABLE));
+    }
+
+    @Test
+    void shouldReject_whenUnavailableRoom_missingCheckInDate() throws Exception {
+        RoomDto invalid = new RoomDto();
+        invalid.setAvailable(false);
+        invalid.setGuestName("John");
+        invalid.setCheckInDate(null);
+        invalid.setCheckOutDate(LocalDate.now().plusDays(6));
+
+        mockMvc.perform(post("/rooms")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJson(invalid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[?(@.field=='checkInDate')].message")
+                        .value(CHECK_IN_DATE_IS_REQUIRED_WHEN_ROOM_IS_NOT_AVAILABLE));
+    }
+
+    @Test
+    void shouldReject_whenUnavailableRoom_missingCheckOutDate() throws Exception {
+        RoomDto invalid = new RoomDto();
+        invalid.setAvailable(false);
+        invalid.setGuestName("John");
+        invalid.setCheckInDate(LocalDate.now().plusDays(6));
+        invalid.setCheckOutDate(null);
+
+        mockMvc.perform(post("/rooms")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJson(invalid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[?(@.field=='checkOutDate')].message")
+                        .value(CHECK_OUT_DATE_IS_REQUIRED_WHEN_ROOM_IS_NOT_AVAILABLE));
+    }
+
+    @Test
+    void shouldReject_whenUnavailableRoom_dto_is_null() throws Exception {
+        mockMvc.perform(post("/rooms")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJson(null)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString("Unexpected error occurred:")));
     }
 
     @Test

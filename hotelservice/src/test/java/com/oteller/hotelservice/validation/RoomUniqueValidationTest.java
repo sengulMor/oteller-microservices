@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -52,7 +53,16 @@ class RoomUniqueValidationTest {
                         .content(objectMapper.registerModule(new JavaTimeModule()).writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$[?(@.field=='roomNumber')].message")
-                        .value("Room number already exists for hotel by id: " +  invalid.getHotelId())); // assuming the message is resolved like this
+                        .value("Room number already exists for hotel by id: " + invalid.getHotelId())); // assuming the message is resolved like this
+    }
+
+    @Test
+    void shouldReject_when_dto_is_null() throws Exception {
+        mockMvc.perform(post("/rooms")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.registerModule(new JavaTimeModule()).writeValueAsString(null)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString("Unexpected error occurred:")));
     }
 }
 
