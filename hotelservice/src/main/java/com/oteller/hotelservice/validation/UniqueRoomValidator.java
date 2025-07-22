@@ -24,10 +24,6 @@ public class UniqueRoomValidator implements ConstraintValidator<UniqueRoom, Room
 
     @Override
     public boolean isValid(RoomDto dto, ConstraintValidatorContext context) {
-        if (dto == null) {
-            return true;
-        }
-
         if (isUnique(dto)) {
             return true;
         }

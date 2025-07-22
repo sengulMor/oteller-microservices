@@ -10,7 +10,6 @@ public class ConditionalNotBlankValidator implements ConstraintValidator<Conditi
     @Override
     public boolean isValid(RoomDto dto, ConstraintValidatorContext context) {
         context.disableDefaultConstraintViolation();
-        if (dto == null) return true;
         return dto.isAvailable()
                 ? validateWhenAvailable(dto, context)
                 : validateWhenUnavailable(dto, context);
