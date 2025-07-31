@@ -1,11 +1,14 @@
 package com.oteller.hotelservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -42,10 +45,11 @@ public class Room extends BaseEntity {
     @Column(name = "check_out_date")
     private LocalDate checkOutDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "hotel_id")
-    @JsonIgnore
+    @JsonBackReference
     private Hotel hotel;
+
 
 }
 

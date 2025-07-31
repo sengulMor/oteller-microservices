@@ -1,5 +1,6 @@
 package com.oteller.hotelservice.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -32,8 +33,12 @@ public class Hotel extends BaseEntity {
     @JoinColumn(name = "address_id", referencedColumnName = "id", unique = true)
     private Address address;
 
+
+    // this acts as FetchType.LAZY, because a  @OneToMany is automaticly lazy
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Room> rooms = new ArrayList<>();
+
 
     public void addRoom(Room room) {
         rooms.add(room);
