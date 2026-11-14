@@ -23,7 +23,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/hoteldb
     username: postgres
-    password: db_password
+    password: mysecretpassword
   jpa:
     hibernate:
       ddl-auto: update

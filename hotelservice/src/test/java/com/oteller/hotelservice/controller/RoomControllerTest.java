@@ -191,6 +191,7 @@ class RoomControllerTest {
                 .guestName("Alice")
                 .checkInDate(LocalDate.of(2025, 7, 20))
                 .checkOutDate(LocalDate.of(2025, 7, 25))
+                .email("susi@gmx.de")
                 .build();
 
         Mockito.when(roomService.reserveIfAvailable(any(RoomAvailabilityDto.class))).thenReturn(true);
@@ -212,8 +213,9 @@ class RoomControllerTest {
                 .roomId(2L)
                 .hotelId(1L)
                 .guestName("Bob")
-                .checkInDate(LocalDate.of(2025, 8, 1))
-                .checkOutDate(LocalDate.of(2025, 8, 5))
+                .checkInDate(LocalDate.of(2027, 8, 1))
+                .checkOutDate(LocalDate.of(2027, 8, 5))
+                .email("sen@gmx.de")
                 .build();
 
         Mockito.when(roomService.reserveIfAvailable(any(RoomAvailabilityDto.class))).thenReturn(false);

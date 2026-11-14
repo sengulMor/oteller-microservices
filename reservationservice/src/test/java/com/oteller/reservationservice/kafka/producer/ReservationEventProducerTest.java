@@ -41,7 +41,7 @@ class ReservationEventProducerTest {
                 .thenReturn(CompletableFuture.completedFuture(null));
 
         // When
-        eventProducer.sendReservationCreatedEvent(reservationId, "johntest@gmail.com");
+        eventProducer.sendReservationCreatedEvent(reservationId, "johntest@gmail.com", "");
 
         // Then
         ArgumentCaptor<ReservationCreatedEvent> eventCaptor = ArgumentCaptor.forClass(ReservationCreatedEvent.class);
@@ -64,7 +64,7 @@ class ReservationEventProducerTest {
                 .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Simulated Exception")));
 
         // when
-        eventProducer.sendReservationCreatedEvent(reservationId, email);
+        eventProducer.sendReservationCreatedEvent(reservationId, email, "");
 
         // then
         ArgumentCaptor<ReservationCreatedEvent> captor = ArgumentCaptor.forClass(ReservationCreatedEvent.class);

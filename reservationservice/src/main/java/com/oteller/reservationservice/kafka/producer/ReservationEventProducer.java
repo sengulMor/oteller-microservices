@@ -20,7 +20,7 @@ public class ReservationEventProducer {
         this.kafkaTopicsConfig = kafkaTopicsConfig;
     }
 
-    public void sendReservationCreatedEvent(Long reservationId, String email) {
+    public void sendReservationCreatedEvent(Long reservationId, String email, String name) {
         log.info("Sending ReservationCreatedEvent to : {}", email);
 
         ReservationCreatedEvent event = getReservationCreatedEvent(reservationId, email);
@@ -36,6 +36,6 @@ public class ReservationEventProducer {
     }
 
     private ReservationCreatedEvent getReservationCreatedEvent(Long reservationId, String email) {
-        return new ReservationCreatedEvent(reservationId, ReservationStatus.CONFIRMED, email);
+        return new ReservationCreatedEvent(reservationId, ReservationStatus.CONFIRMED, email, "Sengül Mor", "Hotel One", "Normal");
     }
 }

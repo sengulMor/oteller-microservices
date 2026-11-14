@@ -44,7 +44,7 @@ class RoomReservedEventListenerTest {
 
         // Then
         verify(reservationService).createReservation(event);
-        verify(eventProducer).sendReservationCreatedEvent(123L, "johntest@gmail.com");
+        verify(eventProducer).sendReservationCreatedEvent(123L, "johntest@gmail.com", "John Doe");
     }
 
     @Test

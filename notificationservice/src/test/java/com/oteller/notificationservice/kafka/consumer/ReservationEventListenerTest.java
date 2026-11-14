@@ -2,6 +2,7 @@ package com.oteller.notificationservice.kafka.consumer;
 
 import com.oteller.enums.ReservationStatus;
 import com.oteller.events.ReservationCreatedEvent;
+import com.oteller.notificationservice.services.AiNotificationService;
 import com.oteller.notificationservice.services.EmailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,9 @@ class ReservationEventListenerTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private AiNotificationService aiNotificationService;
+
     @InjectMocks
     private ReservationEventListener listener;
 
@@ -31,6 +35,12 @@ class ReservationEventListenerTest {
         event.setReservationId(1L);
         event.setStatus(ReservationStatus.CONFIRMED);
         event.setEmail("johntest@gmail.com");
+
+        Mockito.when(aiNotificationService.generateWelcomeMessage(
+                event.getName(),
+                event.getHotelName(),
+                event.getRoomType()
+        )).thenReturn("Email Message to inform Customer of successfully reservation");
 
         Mockito.doNothing().when(emailService).sendReservationConfirmation(anyString(), anyString());
         // When

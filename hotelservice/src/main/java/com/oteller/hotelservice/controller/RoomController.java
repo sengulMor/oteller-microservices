@@ -54,7 +54,7 @@ public class RoomController {
     }
 
     @PostMapping("/check-availability")
-    public ResponseEntity<Boolean> checkAvailability(@RequestBody RoomAvailabilityDto dto) {
+    public ResponseEntity<Boolean> checkAvailability(@Valid @RequestBody RoomAvailabilityDto dto) {
         log.info("Check availability for room with id={}", dto.getRoomId());
         return ResponseEntity.ok(roomService.reserveIfAvailable(dto));
     }

@@ -29,7 +29,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/reservationdb
     username: postgres
-    password: db_password
+    password: mysecretpassword
   jpa:
     hibernate:
       ddl-auto: update

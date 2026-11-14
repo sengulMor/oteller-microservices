@@ -33,6 +33,7 @@ class HotelServiceTest {
 
     @Test
     void create_shouldReturnDto_whenSuccess() {
+      
         HotelDto dto = getHotelDto();
         Hotel hotelEntity = new Hotel();
         Hotel savedHotel = new Hotel();

@@ -91,3 +91,23 @@ services that rely on them.
 - Centralized configuration (e.g., Spring Cloud Config)
 - Tracing and monitoring (e.g., Zipkin, Prometheus, Grafana)
 
+- integration tests
+- add profiles like dev, test....
+- use of actuator, to chekc health of the app, is it fast and son on
+- factoryBean
+- use Pageable
+- to avoid N+1 problem use this -->  List<Hotel> findAllWithRooms();
+- Compensating Transaction Pattern for rollback,
+  if reservation update failed, then rollback the room availability
+- use join entity (also called an association class) instead of @ManyToMany ,
+  create one entity with two fields which have ManyToMany relations
+- use spring data jpa Pageable
+- use hibernate
+- liquibase, flyway
+- DATABASECHANGELOG to sum checksum
+- actuator
+- AOP kullan
+- Optional wrapper sınıf kullan
+- lampda expresiion -- > funktional interface --> use predicate
+
+

@@ -1,9 +1,9 @@
 package com.oteller.notificationservice.kafka.consumer;
 
 import com.oteller.events.ReservationCreatedEvent;
+import com.oteller.notificationservice.services.AiNotificationService;
 import com.oteller.notificationservice.services.EmailService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 public class ReservationEventListener {
 
     private final EmailService emailService;
+    private final AiNotificationService aiNotificationService;
 
-    @Autowired
-    public ReservationEventListener(EmailService emailService) {
+    public ReservationEventListener(EmailService emailService, AiNotificationService aiNotificationService) {
         this.emailService = emailService;
+        this.aiNotificationService = aiNotificationService;
     }
 
 
@@ -26,12 +27,16 @@ public class ReservationEventListener {
             log.warn("Invalid event received: {}", event);
             throw new IllegalArgumentException("Invalid event received, empty fields.");
         }
-        String message = getConfirmationMessage(event);
-        emailService.sendReservationConfirmation(event.getEmail(), message);
-        log.info("Email for Reservation is send: {}", event.getReservationId());
-    }
 
-    private String getConfirmationMessage(ReservationCreatedEvent event) {
-        return "Thank you for your reservation!\nDetails:\n {\"reservationId\":" + event.getReservationId() + ",\"status\":" + event.getStatus() + "}";
+        // Generate email message via Spring AI
+        String aiMessage = aiNotificationService.generateWelcomeMessage(
+                event.getName(),
+                event.getHotelName(),
+                event.getRoomType()
+        );
+
+        emailService.sendReservationConfirmation(event.getEmail(), aiMessage);
+
+        log.info("AI-enhanced email for Reservation {} sent successfully!", event.getReservationId());
     }
 }

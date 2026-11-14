@@ -26,6 +26,7 @@ public class RoomService {
     private final RoomReservedEventProducer roomReservedEventProducer;
     private final HotelRepository hotelRepository;
     private final RoomMapper roomMapper;
+    private boolean hasOverlap;
 
     public RoomService(RoomRepository roomRepository, RoomReservedEventProducer roomReservedEventProducer,
                        HotelRepository hotelRepository, RoomMapper roomMapper) {
