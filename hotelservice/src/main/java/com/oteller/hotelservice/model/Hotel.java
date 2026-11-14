@@ -39,9 +39,18 @@ public class Hotel extends BaseEntity {
     @JsonManagedReference
     private List<Room> rooms = new ArrayList<>();
 
+    @OneToMany()
+    @JoinColumn(name = "review_id", referencedColumnName = "id", unique = true)
+    private List<Review> reviews;
+
 
     public void addRoom(Room room) {
         rooms.add(room);
         room.setHotel(this);
+    }
+
+    public void addReview(Review review) {
+        reviews.add(review);
+        review.setHotel(this);
     }
 }

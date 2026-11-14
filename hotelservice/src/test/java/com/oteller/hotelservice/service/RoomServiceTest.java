@@ -57,7 +57,7 @@ class RoomServiceTest {
     @BeforeEach
     void setUp() {
         address = new Address("Max street 3", "Ankara", "Turkey", "35126", null);
-        hotel = new Hotel("Test Hotel", 3, address, null);
+        hotel = new Hotel("Test Hotel", 3, address, null, List.of());
         hotel.setId(hotelId);
         roomDto = RoomDto.builder()
                 .id(1L)

@@ -29,7 +29,6 @@ public class HotelService {
     public HotelDto create(HotelDto dto) {
         Hotel hotel = hotelMapper.toEntity(dto);
         Hotel savedHotel = hotelRepository.save(hotel);
-
         return hotelMapper.toDto(savedHotel);
     }
 

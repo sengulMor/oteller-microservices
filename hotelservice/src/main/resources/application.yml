@@ -13,6 +13,12 @@ spring:
   #      resource-server:
   #        jwt:
   #          issuer-uri: http://localhost:8080
+  ai:
+    openai:
+      api-key: ${OPEN_AI_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
   kafka:
     topic:
       room-reserved: room-reserved-events
