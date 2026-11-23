@@ -1,6 +1,7 @@
 package com.oteller.hotelservice.service;
 
 import com.oteller.events.RoomReservedEvent;
+import com.oteller.hotelservice.dto.HotelAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.exception.HotelNotFoundException;
@@ -129,6 +130,32 @@ class RoomServiceTest {
 
         assertFalse(result);
         verify(roomReservedEventProducer, never()).sendRoomReservedEvent(any());
+    }
+
+    @Test
+    void shouldReturnTrue_whenHotelHasAvailableRoom() {
+        HotelAvailabilityDto dto = HotelAvailabilityDto.builder()
+                .hotelId(hotelId)
+                .build();
+        when(roomRepository.existsByAvailableAndHotel_Id(true, hotelId)).thenReturn(true);
+
+        boolean result = roomService.checkIfAvailable(dto);
+
+        assertTrue(result);
+        verify(roomRepository).existsByAvailableAndHotel_Id(true, hotelId);
+    }
+
+    @Test
+    void shouldReturnFalse_whenHotelHasNoAvailableRoom() {
+        HotelAvailabilityDto dto = HotelAvailabilityDto.builder()
+                .hotelId(hotelId)
+                .build();
+        when(roomRepository.existsByAvailableAndHotel_Id(true, hotelId)).thenReturn(false);
+
+        boolean result = roomService.checkIfAvailable(dto);
+
+        assertFalse(result);
+        verify(roomRepository).existsByAvailableAndHotel_Id(true, hotelId);
     }
 
     @Test
