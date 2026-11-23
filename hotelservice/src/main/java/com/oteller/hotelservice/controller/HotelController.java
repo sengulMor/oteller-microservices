@@ -17,7 +17,7 @@ public class HotelController {
 
     private final HotelService hotelService;
 
-    public HotelController(HotelService hotelService) {           //constructer dependency injection
+    public HotelController(HotelService hotelService) {
         this.hotelService = hotelService;
     }
 
@@ -51,4 +51,5 @@ public class HotelController {
         log.info("Updating hotel with id={}", hotelDto.getId());
         return ResponseEntity.ok(hotelService.update(hotelDto));
     }
+
 }

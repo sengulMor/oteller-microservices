@@ -2,6 +2,7 @@ package com.oteller.hotelservice.services;
 
 import com.oteller.enums.ReservationStatus;
 import com.oteller.events.RoomReservedEvent;
+import com.oteller.hotelservice.dto.HotelAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomDto;
 import com.oteller.hotelservice.exception.HotelNotFoundException;
@@ -120,5 +121,10 @@ public class RoomService {
     private RoomReservedEvent getRoomReservedEvent(RoomAvailabilityDto dto) {
         return new RoomReservedEvent(dto.getHotelId(), dto.getRoomId(),
                 dto.getGuestName(), dto.getCheckInDate(), dto.getCheckOutDate(), ReservationStatus.CONFIRMED, dto.getEmail());
+    }
+
+    @Transactional
+    public boolean checkIfAvailable(HotelAvailabilityDto dto) {
+        return roomRepository.existsByAvailableAndHotel_Id(true, dto.getHotelId());
     }
 }

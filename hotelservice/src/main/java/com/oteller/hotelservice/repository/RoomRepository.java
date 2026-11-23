@@ -24,5 +24,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     Optional<Room> findByIdAndHotel_Id(Long id, Long hotelId);
 
+    boolean existsByAvailableAndHotel_Id(boolean availability, Long hotelId);
 
 }

@@ -28,7 +28,7 @@ services:
     restart: always
 
   postgres_reservation:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: postgres_reservation
     environment:
       POSTGRES_DB: reservationdb

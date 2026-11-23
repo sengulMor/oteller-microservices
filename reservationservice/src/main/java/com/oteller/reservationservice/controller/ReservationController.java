@@ -1,6 +1,7 @@
 package com.oteller.reservationservice.controller;
 
 import com.oteller.reservationservice.dto.ReservationDTO;
+import com.oteller.reservationservice.services.HotelAssistantService;
 import com.oteller.reservationservice.services.ReservationService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +16,12 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final HotelAssistantService service;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 HotelAssistantService service) {
         this.reservationService = reservationService;
+        this.service = service;
     }
 
     @PostMapping
@@ -36,6 +40,11 @@ public class ReservationController {
     public ResponseEntity<List<ReservationDTO>> getAllReservations() {
         log.info("get all reservations");
         return ResponseEntity.ok(reservationService.getAllReservations());
+    }
+
+    @GetMapping("/ask")
+    public ResponseEntity<String> ask(@RequestParam(name = "question") String question) {
+        return ResponseEntity.ok(service.askHotelQuestion(question));
     }
 
     /*TODO: Implement update reservation endpoint  */

@@ -3,9 +3,6 @@ package com.oteller.hotelservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oteller.hotelservice.dto.AddressDto;
 import com.oteller.hotelservice.dto.HotelDto;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import com.oteller.hotelservice.exception.HotelNotFoundException;
 import com.oteller.hotelservice.model.Address;
 import com.oteller.hotelservice.repository.AddressRepository;
@@ -22,8 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
 @SpringBootTest
@@ -60,7 +59,7 @@ class HotelControllerTest {
     @Test
     void shouldReturnBadRequest_whenMissingName() throws Exception {
         AddressDto requestAddress = new AddressDto(null, "Alte Post str 37", "Stuttgart", "Deutschland", "34521");
-        HotelDto invalidDto =  new HotelDto(null, "", 3, requestAddress, null, null, null);
+        HotelDto invalidDto = new HotelDto(null, "", 3, requestAddress, null, null, null);
         mockMvc.perform(post("/hotels")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
@@ -72,7 +71,7 @@ class HotelControllerTest {
     @Test
     void shouldReturnBadRequest_whenStarRatingIsUnderMinValue() throws Exception {
         AddressDto requestAddress = new AddressDto(null, "Alte Post str 37", "Stuttgart", "Deutschland", "34521");
-        HotelDto invalidDto =  new HotelDto(null, "Hotel One", 0, requestAddress, null, null, null);
+        HotelDto invalidDto = new HotelDto(null, "Hotel One", 0, requestAddress, null, null, null);
         mockMvc.perform(post("/hotels")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
@@ -84,7 +83,7 @@ class HotelControllerTest {
     @Test
     void shouldReturnBadRequest_whenStarRatingIsAboveMaxValue() throws Exception {
         AddressDto requestAddress = new AddressDto(null, "Alte Post str 37", "Stuttgart", "Deutschland", "34521");
-        HotelDto invalidDto =  new HotelDto(null, "Hotel One", 9, requestAddress, null, null, null);
+        HotelDto invalidDto = new HotelDto(null, "Hotel One", 9, requestAddress, null, null, null);
         mockMvc.perform(post("/hotels")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidDto)))
