@@ -1,4 +1,0 @@
-com\oteller\enums\ReservationStatus.class
-com\oteller\Main.class
-com\oteller\events\ReservationCreatedEvent.class
-com\oteller\events\RoomReservedEvent.class
