@@ -49,8 +49,9 @@ class UniqueHotelAddressValidatorTest {
         HotelDto dto = new HotelDto();
         dto.setAddress(addressDto);
 
-        when(addressRepository.findByStreetAndCityAndZipCodeAndCountry(
-                addressDto.getStreet(), addressDto.getCity(), addressDto.getZipCode(), addressDto.getCountry()))
+        when(addressRepository.findByStreetAndNumberAndCityAndZipCodeAndCountry(
+                addressDto.getStreet(), addressDto.getNumber(), addressDto.getCity(),
+                addressDto.getZipCode(), addressDto.getCountry()))
                 .thenReturn(Optional.empty());
 
         boolean isValid = validator.isValid(dto, context);
@@ -67,8 +68,9 @@ class UniqueHotelAddressValidatorTest {
         Address addressEntity = new Address();
         addressEntity.setId(1L);
 
-        when(addressRepository.findByStreetAndCityAndZipCodeAndCountry(
-                addressDto.getStreet(), addressDto.getCity(), addressDto.getZipCode(), addressDto.getCountry()))
+        when(addressRepository.findByStreetAndNumberAndCityAndZipCodeAndCountry(
+                addressDto.getStreet(), addressDto.getNumber(), addressDto.getCity(),
+                addressDto.getZipCode(), addressDto.getCountry()))
                 .thenReturn(Optional.of(addressEntity));
 
         boolean isValid = validator.isValid(dto, context);
@@ -85,8 +87,9 @@ class UniqueHotelAddressValidatorTest {
         Address addressEntity = new Address();
         addressEntity.setId(99L); // different ID → conflict
 
-        when(addressRepository.findByStreetAndCityAndZipCodeAndCountry(
-                addressDto.getStreet(), addressDto.getCity(), addressDto.getZipCode(), addressDto.getCountry()))
+        when(addressRepository.findByStreetAndNumberAndCityAndZipCodeAndCountry(
+                addressDto.getStreet(), addressDto.getNumber(), addressDto.getCity(),
+                addressDto.getZipCode(), addressDto.getCountry()))
                 .thenReturn(Optional.of(addressEntity));
 
         boolean isValid = validator.isValid(dto, context);
@@ -100,6 +103,7 @@ class UniqueHotelAddressValidatorTest {
         return AddressDto.builder()
                 .id(id)
                 .street("Main Street")
+                .number(10)
                 .city("Istanbul")
                 .zipCode("34000")
                 .country("TR")

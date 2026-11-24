@@ -17,6 +17,9 @@ public class Address extends BaseEntity {
     @Column(name = "street", nullable = false, length = 255)
     private String street;
 
+    @Column(name = "number")
+    private Integer number;
+
     @NotBlank(message = "City must not be blank")
     @Column(name = "city", nullable = false, length = 100)
     private String city;
@@ -32,5 +35,9 @@ public class Address extends BaseEntity {
     @JsonIgnore
     @OneToOne(mappedBy = "address")
     private Hotel hotel;
+
+    public Address(String street, String city, String country, String zipCode, Hotel hotel) {
+        this(street, null, city, country, zipCode, hotel);
+    }
 
 }

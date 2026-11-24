@@ -16,11 +16,14 @@ public class HotelAvailabilityTools {
         this.roomService = roomService;
     }
 
-    @Tool(description = "Prüft, ob für ein bestimmtes Hotel und Datum freie Zimmer verfügbar sind")
+    @Tool(description = "Prüft, ob für das Hotel mindestens ein als verfügbar markiertes Zimmer vorhanden ist. " +
+            "Check-in und Check-out werden auf Pflichtangabe und korrekte Reihenfolge geprüft; " +
+            "die aktuelle Verfügbarkeitsabfrage berücksichtigt die Belegung im angegebenen Zeitraum nicht.")
     public boolean checkRoomAvailability(
-            @ToolParam(description = "Positive ID des Hotels") Long hotelId,
-            @ToolParam(description = "Check-in-Datum im Format YYYY-MM-DD") LocalDate checkIn,
-            @ToolParam(description = "Check-out-Datum im Format YYYY-MM-DD, das nach dem Check-in-Datum liegt") LocalDate checkOut
+            @ToolParam(description = "Pflichtangabe: positive numerische ID des Hotels.") Long hotelId,
+            @ToolParam(description = "Pflichtangabe: Check-in-Datum im ISO-Format YYYY-MM-DD.") LocalDate checkIn,
+            @ToolParam(description = "Pflichtangabe: Check-out-Datum im ISO-Format YYYY-MM-DD. " +
+                    "Muss nach dem Check-in-Datum liegen.") LocalDate checkOut
     ) {
         validateParameters(hotelId, checkIn, checkOut);
 

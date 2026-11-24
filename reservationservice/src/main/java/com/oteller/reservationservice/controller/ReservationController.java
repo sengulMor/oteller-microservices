@@ -42,6 +42,12 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getAllReservations());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancel(@PathVariable("id") Long id) {
+        reservationService.cancelReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/ask")
     public ResponseEntity<String> ask(@RequestParam(name = "question") String question) {
         return ResponseEntity.ok(service.askHotelQuestion(question));

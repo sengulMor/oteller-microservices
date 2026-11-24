@@ -28,8 +28,9 @@ public class UniqueHotelAddressValidator implements ConstraintValidator<UniqueHo
             return true;
         }
 
-        Optional<Address> optionalAddress = addressRepository.findByStreetAndCityAndZipCodeAndCountry(
+        Optional<Address> optionalAddress = addressRepository.findByStreetAndNumberAndCityAndZipCodeAndCountry(
                 addressDto.getStreet(),
+                addressDto.getNumber(),
                 addressDto.getCity(),
                 addressDto.getZipCode(),
                 addressDto.getCountry()

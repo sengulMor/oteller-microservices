@@ -9,7 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +28,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class HotelAvailabilityToolsTest {
 
+    private static final String TOOL_DESCRIPTION =
+            "Prüft, ob für das Hotel mindestens ein als verfügbar markiertes Zimmer vorhanden ist. " +
+                    "Check-in und Check-out werden auf Pflichtangabe und korrekte Reihenfolge geprüft; " +
+                    "die aktuelle Verfügbarkeitsabfrage berücksichtigt die Belegung im angegebenen Zeitraum nicht.";
+
     @Mock
     private RoomService roomService;
 
@@ -32,6 +41,23 @@ class HotelAvailabilityToolsTest {
     @BeforeEach
     void setUp() {
         tools = new HotelAvailabilityTools(roomService);
+    }
+
+    @Test
+    void shouldExposeDescriptiveToolMetadata() throws NoSuchMethodException {
+        Method method = HotelAvailabilityTools.class.getMethod(
+                "checkRoomAvailability", Long.class, LocalDate.class, LocalDate.class);
+        Tool tool = method.getAnnotation(Tool.class);
+        Parameter[] parameters = method.getParameters();
+
+        assertEquals(TOOL_DESCRIPTION, tool.description());
+        assertEquals("Pflichtangabe: positive numerische ID des Hotels.",
+                parameters[0].getAnnotation(ToolParam.class).description());
+        assertEquals("Pflichtangabe: Check-in-Datum im ISO-Format YYYY-MM-DD.",
+                parameters[1].getAnnotation(ToolParam.class).description());
+        assertEquals("Pflichtangabe: Check-out-Datum im ISO-Format YYYY-MM-DD. " +
+                        "Muss nach dem Check-in-Datum liegen.",
+                parameters[2].getAnnotation(ToolParam.class).description());
     }
 
     @Test
@@ -77,6 +103,10 @@ class HotelAvailabilityToolsTest {
     void shouldRejectNonPositiveHotelId() {
         assertThrows(IllegalArgumentException.class,
                 () -> tools.checkRoomAvailability(0L,
+                        LocalDate.of(2026, 6, 10),
+                        LocalDate.of(2026, 6, 15)));
+        assertThrows(IllegalArgumentException.class,
+                () -> tools.checkRoomAvailability(-1L,
                         LocalDate.of(2026, 6, 10),
                         LocalDate.of(2026, 6, 15)));
         verify(roomService, never()).checkIfAvailable(any());

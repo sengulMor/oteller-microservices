@@ -13,4 +13,5 @@ public class KafkaTopicsConfig {
 
     private String roomReserved;
     private String reservationCreated;
+    private String roomReleased;
 }

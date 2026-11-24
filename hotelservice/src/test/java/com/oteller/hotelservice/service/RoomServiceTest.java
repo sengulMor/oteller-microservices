@@ -1,6 +1,7 @@
 package com.oteller.hotelservice.service;
 
 import com.oteller.events.RoomReservedEvent;
+import com.oteller.events.RoomReleasedEvent;
 import com.oteller.hotelservice.dto.HotelAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomDto;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +59,7 @@ class RoomServiceTest {
 
     @BeforeEach
     void setUp() {
-        address = new Address("Max street 3", "Ankara", "Turkey", "35126", null);
+        address = new Address("Max street", 3, "Ankara", "Turkey", "35126", null);
         hotel = new Hotel("Test Hotel", 3, address, null, List.of());
         hotel.setId(hotelId);
         roomDto = RoomDto.builder()
@@ -130,6 +132,82 @@ class RoomServiceTest {
 
         assertFalse(result);
         verify(roomReservedEventProducer, never()).sendRoomReservedEvent(any());
+    }
+
+    @Test
+    void shouldReleaseRoomWhenCancellationMatchesCurrentReservation() {
+        Long roomId = 1L;
+        LocalDate checkIn = LocalDate.of(2026, 12, 1);
+        LocalDate checkOut = LocalDate.of(2026, 12, 5);
+        room.setId(roomId);
+        room.setAvailable(false);
+        room.setGuestName("John");
+        room.setCheckInDate(checkIn);
+        room.setCheckOutDate(checkOut);
+        RoomReleasedEvent event = new RoomReleasedEvent(
+                "event-123", Instant.parse("2026-11-24T10:00:00Z"),
+                7L, hotelId, roomId, "John", checkIn, checkOut);
+        when(roomRepository.findRoomForUpdate(roomId, hotelId)).thenReturn(Optional.of(room));
+        when(roomRepository.save(room)).thenReturn(room);
+
+        boolean released = roomService.releaseRoom(event);
+
+        assertTrue(released);
+        assertTrue(room.isAvailable());
+        assertNull(room.getGuestName());
+        assertNull(room.getCheckInDate());
+        assertNull(room.getCheckOutDate());
+        verify(roomRepository).save(room);
+    }
+
+    @Test
+    void shouldIgnoreDuplicateRoomReleaseEvent() {
+        Long roomId = 1L;
+        room.setId(roomId);
+        room.setAvailable(true);
+        RoomReleasedEvent event = new RoomReleasedEvent(
+                "event-123", Instant.parse("2026-11-24T10:00:00Z"),
+                7L, hotelId, roomId, "John",
+                LocalDate.of(2026, 12, 1), LocalDate.of(2026, 12, 5));
+        when(roomRepository.findRoomForUpdate(roomId, hotelId)).thenReturn(Optional.of(room));
+
+        boolean released = roomService.releaseRoom(event);
+
+        assertFalse(released);
+        verify(roomRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldNotReleaseRoomForStaleCancellation() {
+        Long roomId = 1L;
+        room.setId(roomId);
+        room.setAvailable(false);
+        room.setGuestName("Jane");
+        room.setCheckInDate(LocalDate.of(2026, 12, 1));
+        room.setCheckOutDate(LocalDate.of(2026, 12, 5));
+        RoomReleasedEvent event = new RoomReleasedEvent(
+                "event-123", Instant.parse("2026-11-24T10:00:00Z"),
+                7L, hotelId, roomId, "John",
+                LocalDate.of(2026, 12, 1), LocalDate.of(2026, 12, 5));
+        when(roomRepository.findRoomForUpdate(roomId, hotelId)).thenReturn(Optional.of(room));
+
+        boolean released = roomService.releaseRoom(event);
+
+        assertFalse(released);
+        assertFalse(room.isAvailable());
+        verify(roomRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectInvalidRoomReleaseEvent() {
+        RoomReleasedEvent event = new RoomReleasedEvent(
+                "event-123", Instant.parse("2026-11-24T10:00:00Z"),
+                7L, hotelId, 1L, "John",
+                LocalDate.of(2026, 12, 5), LocalDate.of(2026, 12, 1));
+
+        assertThrows(IllegalArgumentException.class, () -> roomService.releaseRoom(event));
+
+        verifyNoInteractions(roomRepository);
     }
 
     @Test

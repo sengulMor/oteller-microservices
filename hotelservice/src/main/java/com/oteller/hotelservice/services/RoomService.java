@@ -1,6 +1,7 @@
 package com.oteller.hotelservice.services;
 
 import com.oteller.enums.ReservationStatus;
+import com.oteller.events.RoomReleasedEvent;
 import com.oteller.events.RoomReservedEvent;
 import com.oteller.hotelservice.dto.HotelAvailabilityDto;
 import com.oteller.hotelservice.dto.RoomAvailabilityDto;
@@ -126,5 +127,47 @@ public class RoomService {
     @Transactional
     public boolean checkIfAvailable(HotelAvailabilityDto dto) {
         return roomRepository.existsByAvailableAndHotel_Id(true, dto.getHotelId());
+    }
+
+    @Transactional
+    public boolean releaseRoom(RoomReleasedEvent event) {
+        validateRoomReleasedEvent(event);
+
+        Room room = roomRepository.findRoomForUpdate(event.getRoomId(), event.getHotelId())
+                .orElseThrow(() -> new RoomNotFoundException(event.getRoomId()));
+
+        if (room.isAvailable()) {
+            log.info("Ignoring duplicate room release event {}", event.getEventId());
+            return false;
+        }
+
+        if (!event.getGuestName().equals(room.getGuestName())
+                || !event.getCheckInDate().equals(room.getCheckInDate())
+                || !event.getCheckOutDate().equals(room.getCheckOutDate())) {
+            log.warn("Ignoring room release event {} because it does not match the current room reservation",
+                    event.getEventId());
+            return false;
+        }
+
+        room.setAvailable(true);
+        room.setGuestName(null);
+        room.setCheckInDate(null);
+        room.setCheckOutDate(null);
+        roomRepository.save(room);
+        return true;
+    }
+
+    private void validateRoomReleasedEvent(RoomReleasedEvent event) {
+        if (event == null
+                || event.getEventId() == null || event.getEventId().isBlank()
+                || event.getOccurredAt() == null
+                || event.getReservationId() == null || event.getReservationId() <= 0
+                || event.getHotelId() == null || event.getHotelId() <= 0
+                || event.getRoomId() == null || event.getRoomId() <= 0
+                || event.getGuestName() == null || event.getGuestName().isBlank()
+                || event.getCheckInDate() == null || event.getCheckOutDate() == null
+                || !event.getCheckOutDate().isAfter(event.getCheckInDate())) {
+            throw new IllegalArgumentException("Room release event has invalid or missing fields");
+        }
     }
 }

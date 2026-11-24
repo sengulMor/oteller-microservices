@@ -10,4 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "spring.kafka.topic")
 public class KafkaTopicsConfig {
     private String roomReserved;
+    private String roomReleased;
 }

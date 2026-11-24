@@ -16,7 +16,8 @@ class AddressMapperTest {
     void shouldMapAddressToDto() {
         // Given
         Address address = new Address();
-        address.setStreet("Alte Post str 37");
+        address.setStreet("Alte Post str");
+        address.setNumber(37);
         address.setCity("Stuttgart");
         address.setCountry("Deutschland");
         address.setZipCode("34521");
@@ -26,6 +27,7 @@ class AddressMapperTest {
 
         // Then
         assertEquals(address.getStreet(), addressDto.getStreet());
+        assertEquals(address.getNumber(), addressDto.getNumber());
         assertEquals(address.getCity(), addressDto.getCity());
         assertEquals(address.getCountry(), addressDto.getCountry());
         assertEquals(address.getZipCode(), addressDto.getZipCode());
@@ -35,7 +37,8 @@ class AddressMapperTest {
     void shouldMapDtoToAddress() {
         // Given
         AddressDto addressDto = new AddressDto();
-        addressDto.setStreet("Alte Post str 37");
+        addressDto.setStreet("Alte Post str");
+        addressDto.setNumber(37);
         addressDto.setCity("Stuttgart");
         addressDto.setCountry("Deutschland");
         addressDto.setZipCode("34521");
@@ -45,6 +48,7 @@ class AddressMapperTest {
 
         // Then
         assertEquals(addressDto.getStreet(), address.getStreet());
+        assertEquals(addressDto.getNumber(), address.getNumber());
         assertEquals(addressDto.getCity(), address.getCity());
         assertEquals(addressDto.getCountry(), address.getCountry());
         assertEquals(addressDto.getZipCode(), address.getZipCode());

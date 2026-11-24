@@ -103,13 +103,14 @@ class HotelControllerTest {
 
     @Test
     void shouldReturnBadRequest_whenHotelAddressIsNotUnique() throws Exception {
-        AddressDto duplicateAddress = new AddressDto(null, "Alte Post str 37", "Stuttgart", "Deutschland", "34521");
+        AddressDto duplicateAddress = new AddressDto(
+                null, "Alte Post str", 37, "Stuttgart", "Deutschland", "34521");
         HotelDto requestDto = new HotelDto(null, "Hilton", 3, duplicateAddress, null, null, null);
 
         Address existingAddress = new Address();
         existingAddress.setId(99L);
-        Mockito.when(addressRepository.findByStreetAndCityAndZipCodeAndCountry(
-                "Alte Post str 37", "Stuttgart", "34521", "Deutschland"
+        Mockito.when(addressRepository.findByStreetAndNumberAndCityAndZipCodeAndCountry(
+                "Alte Post str", 37, "Stuttgart", "34521", "Deutschland"
         )).thenReturn(Optional.of(existingAddress));
 
         // When + Then: Expect validation to fail with message

@@ -13,6 +13,7 @@ spring:
     topic:
       room-reserved: room-reserved-events
       reservation-created: reservation-created-events
+      room-released: room-released-events
     consumer:
       bootstrap-servers: localhost:9092
       group-id: reservation-group
