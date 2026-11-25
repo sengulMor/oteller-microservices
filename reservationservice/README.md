@@ -1,118 +1,219 @@
-# Reservation Service - Oteller Microservices Project
+# Reservation Service – Oteller Microservices
 
-The **Reservation Service** is part of the *Oteller Microservices Architecture*. It handles all reservation-related
-operations such as creating, retrieving, and validating hotel reservations. The service also produces Kafka events (
-e.g., `reservation-created`) to notify other components of the system.
+The **Reservation Service** manages hotel reservations, orders, Kafka event integration, and AI-assisted booking and hotel information queries within the Oteller microservices architecture.
 
 ## Features
 
-- Create new reservations
-- Retrieve all reservations
-- Retrieve a reservation by ID
-- Input validation using custom annotations
-- Kafka integration for event publishing (`reservation-created`)
-- RESTful API using Spring Boot
-- Exception handling with detailed responses
-- Unit testing with JUnit and Mockito
+- Create, retrieve, list, and cancel reservations
+- Validate check-in/check-out date ranges
+- Create simple orders
+- Consume room-reserved events and create reservations transactionally
+- Publish reservation-created and room-released events
+- Provide a RAG hotel assistant using PostgreSQL pgvector
+- Provide a booking assistant with Spring AI tool calling
+- Centralized exception handling
+- JUnit 5 and Mockito tests
 
-## Tech Stack
+## Technology Stack
 
 - Java 17
-- Spring Boot
-- Maven
-- Kafka (for asynchronous event communication)
-- JPA/Hibernate
-- PostgreSQL
-- Docker (optional)
+- Spring Boot 3 / Spring Web
+- Spring Data JPA and Hibernate
+- PostgreSQL with pgvector
+- Apache Kafka and Spring Kafka
+- Spring AI OpenAI and Vector Store
+- Spring Security
 - Lombok
 - MapStruct
-
-## Getting Started
-
-### Prerequisites
-
-- Java 17+
 - Maven
-- PostgreSQL (or use Docker to spin up a container)
-- Kafka (can be run via Docker or installed locally)
-- SonarScanner (optional, for code quality analysis)
+- Docker Compose
+- JaCoCo and SonarQube
 
-### Running the Application
+## Prerequisites
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/oteller-microservices.git
-   cd reservationservice
-   ```
+- JDK 17 or later
+- PostgreSQL
+- Apache Kafka
+- Optional: Docker and Docker Compose
+- For AI features: a valid OpenAI API key
 
-2. Configure the database connection in `src/main/resources/application.yml`:
+## Start the Infrastructure
 
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:postgresql://localhost:5433/reservationdb
-       username: postgres
-       password: yourpassword
-     jpa:
-       hibernate:
-         ddl-auto: update
-       show-sql: true
-       properties:
-         hibernate:
-           dialect: org.hibernate.dialect.PostgreSQLDialect
-   
-   kafka:
-     bootstrap-servers: localhost:9092
-     topic:
-       room-reserved: room-reserved-events
-       reservation-created: reservation-created-events
-   ```
+From the repository root:
 
-3. Start the application:
-   ```bash
-   mvn spring-boot:run
+```bash
+docker compose up -d
+```
 
-4. (Optional) Run SonarQube for Code Quality Analysis:
+The Reservation Service uses:
 
-   #### Option A: Using Docker
-    * it should be runable if you already run docker compose file
+| Component | Address |
+|---|---|
+| Reservation PostgreSQL/pgvector | `localhost:5433`, database `reservationdb` |
+| Kafka | `localhost:9092` |
+| Hotel Service | `http://localhost:8081` |
+| SonarQube | `http://localhost:9000` |
 
-    * Then open http://localhost:9000
-    * Login with:  
-      user: admin  
-      passwort: admin  
-      you will be prompted to change the password
+The PostgreSQL credentials are `postgres` / `mysecretpassword`.
 
-   #### Option B: Manual Installation
-    * Download SonarQube: https://www.sonarsource.com/products/sonarqube/downloads/
+## Configure and Start the Application
 
-    * Extract and run:  
-      On Windows: StartSonar.bat  
-      On Linux/macOS: sonar.sh start
+The `application.yml` configuration resolves the OpenAI key from `OPEN_AI_KEY`:
 
-    * Open http://localhost:9000
+```yaml
+spring:
+  ai:
+    openai:
+      api-key: ${OPEN_AI_KEY}
+```
 
-   Generate a Token for CLI Scanning
-    1. Log in to SonarQube
+When deployed to Tomcat, configure `OPEN_AI_KEY` as an environment variable in the Tomcat service configuration, then restart Tomcat. Do not put the key directly in `application.yml` or commit it to the repository.
 
-    2. Go to My Account > Security
+For local development with `spring-boot:run`, set the variable in the shell before starting the service:
 
-    3. Create a new token (e.g., reservation-service)
+```bash
+# Windows PowerShell
+$env:OPEN_AI_KEY="<your-api-key>"
+```
 
-    4. Copy the token and configure the following file in your project root:
-       ```yaml
-          sonar-project.properties  
-       ```
+```bash
+# macOS/Linux
+export OPEN_AI_KEY="<your-api-key>"
+```
 
-       ```yaml
-          sonar.projectKey=reservation-service
-          sonar.projectName=Reservation Service
-          sonar.sources=src
-          sonar.java.binaries=target
-          sonar.login=your_generated_token_here
-       ```
-    5. Run the Scanner:
-       ```bash
-       sonar-scanner
-       ```
+Start the service:
 
+```bash
+# Windows
+.\mvnw.cmd spring-boot:run
+
+# macOS/Linux
+./mvnw spring-boot:run
+```
+
+The service runs on port `8082` by default. Its main configuration is in `src/main/resources/application.yml`:
+
+```yaml
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/reservationdb
+    username: postgres
+    password: mysecretpassword
+  ai:
+    openai:
+      api-key: ${OPEN_AI_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+  kafka:
+    topic:
+      room-reserved: room-reserved-events
+      reservation-created: reservation-created-events
+      room-released: room-released-events
+
+hotel-service:
+  base-url: http://localhost:8081
+```
+
+All HTTP endpoints are currently allowed by the service security configuration.
+
+## REST Endpoints
+
+### Reservations
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/reservation` | Create a reservation |
+| `GET` | `/reservation` | Retrieve all reservations |
+| `GET` | `/reservation/{id}` | Retrieve a reservation by ID |
+| `DELETE` | `/reservation/{id}` | Cancel a reservation |
+| `GET` | `/reservation/ask?question={text}` | Ask the RAG hotel assistant |
+
+Example reservation request:
+
+```bash
+curl -X POST http://localhost:8082/reservation \
+  -H "Content-Type: application/json" \
+  -d '{
+    "hotelId": 1,
+    "roomId": 10,
+    "guestName": "Ada Lovelace",
+    "checkInDate": "2026-12-20",
+    "checkOutDate": "2026-12-23",
+    "email": "ada@example.com"
+  }'
+```
+
+### Orders
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/order` | Create an order |
+
+```bash
+curl -X POST http://localhost:8082/order \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Airport transfer","description":"Pickup at 15:00"}'
+```
+
+### Booking Assistant
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/booking-assistant/chat?message={text}` | Chat with the Spring AI booking assistant |
+
+```bash
+curl "http://localhost:8082/booking-assistant/chat?message=Is%20room%2010%20available%20from%202026-12-20%20to%202026-12-23"
+```
+
+The assistant can use the `RoomAvailabilityTools` Spring AI tool and validates hotel ID, room availability parameters, and date ranges before calling downstream services.
+
+## Kafka Event Flow
+
+| Topic | Default name | Role |
+|---|---|---|
+| `spring.kafka.topic.room-reserved` | `room-reserved-events` | Consumed after a room reservation succeeds |
+| `spring.kafka.topic.reservation-created` | `reservation-created-events` | Published after the reservation is created |
+| `spring.kafka.topic.room-released` | `room-released-events` | Published when a reservation is cancelled |
+
+The room-reserved listener validates the event and creates the reservation transactionally. Cancellation publishes a room-released event so the Hotel Service can release the room.
+
+## Tests
+
+Run all tests:
+
+```bash
+# Windows
+.\mvnw.cmd test
+
+# macOS/Linux
+./mvnw test
+```
+
+The Maven build generates a JaCoCo coverage report at `target/site/jacoco/index.html`.
+
+## SonarQube
+
+After starting SonarQube:
+
+1. Open `http://localhost:9000`.
+2. Sign in with `admin / admin` and change the initial password.
+3. Create a token under **My Account → Security**.
+4. Update `sonar-project.properties`:
+
+```properties
+sonar.projectKey=reservation-service
+sonar.projectName=Reservation Service
+sonar.sources=src
+sonar.java.binaries=target
+sonar.login=<your-generated-token>
+```
+
+5. Run the scanner from the `reservationservice` directory:
+
+```bash
+sonar-scanner
+```

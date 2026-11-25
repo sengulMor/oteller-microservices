@@ -1,113 +1,152 @@
-# Oteller Microservices Project
+# Oteller Microservices
 
-**Oteller Microservices** is a distributed hotel reservation system composed of several independently deployable
-services. It allows hotel registration, room management, and room reservation, and uses Kafka for asynchronous
-communication between services.
+Oteller is a distributed hotel reservation system built from independently runnable Spring Boot services. It manages hotels, rooms, reservations, and notifications, with Kafka events connecting the services. AI-enabled features provide hotel information and booking assistance.
 
-## Microservices
+## Architecture
 
-The system includes the following services:
+| Module | Responsibility | Default address |
+|---|---|---|
+| `apigateway` | Reactive API entry point; routes hotel and reservation requests | `http://localhost:8080` |
+| `hotelservice` | Hotel, room, availability, and review management; hotel assistant and MCP server | `http://localhost:8081` |
+| `reservationservice` | Reservations, orders, booking assistant, and hotel information RAG | `http://localhost:8082` |
+| `notificationservice` | Consumes reservation-created events and sends confirmation emails | Port `8083` |
+| `common-events` | Shared Kafka event payloads and enums | Java library |
 
-- **API Gateway** – Central entry point for routing requests to services
-- **Hotel Service** – Manages hotels and their rooms
-- **Reservation Service** – Handles reservation creation and lookup
-- **Notification Service** – Listens for reservation events and sends notifications
+The gateway currently routes `/hotel-service/**` to the Hotel Service and `/reservation-service/**` to the Reservation Service, removing each prefix before forwarding. For example:
 
-Additionally, there's a shared library:
+```text
+GET http://localhost:8080/reservation-service/reservation
+    -> GET http://localhost:8082/reservation
+```
 
-- **common-events** – Contains reusable DTOs and event classes for Kafka communication
+See each module's README for its endpoint details and configuration.
 
-## Features
+## Technology
 
-- Register new hotels
-- Add and manage hotel rooms
-- Check room availability
-- Create and manage reservations
-- Kafka-based event-driven communication
-- Room and reservation validation using custom annotations
-- RESTful APIs using Spring Boot
-- Exception handling with meaningful responses
-- Unit testing with JUnit and Mockito
+- Java 17 and Spring Boot
+- Spring Cloud Gateway and WebFlux
+- Spring Data JPA / Hibernate and PostgreSQL
+- Apache Kafka and Spring Kafka
+- Spring AI with OpenAI; pgvector for reservation-service RAG
+- Maven, Lombok, and MapStruct
+- Docker Compose, JaCoCo, and SonarQube
 
-## Tech Stack
+## Prerequisites
 
-- Java 17
-- Spring Boot
-- Maven
-- Apache Kafka
-- PostgreSQL
-- JPA / Hibernate
-- Docker (optional for local deployment)
-- Lombok
-- MapStruct
+- JDK 17 or later
+- Maven (or the Maven Wrapper included in each service module)
+- Docker and Docker Compose for local infrastructure
+- OpenAI API key for AI-enabled Hotel, Reservation, and Notification features
+- SMTP account for Notification Service email delivery
 
-## Getting Started
+## Start Local Infrastructure
 
-### Prerequisites
+From the repository root, start Kafka, PostgreSQL, and SonarQube:
 
-- Java 17 or higher
-- Maven
-- PostgreSQL
-- Kafka (for asynchronous messaging)
-- Docker (optional, for running PostgreSQL/Kafka locally)
+```bash
+docker compose up -d
+```
 
-### Running the Application
+Docker Compose exposes these local services:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/oteller-microservices.git
-   cd oteller-microservices
-   ```
-2. Navigate to a service directory (e.g., `cd reservationservice`), configure `application.yml`, and run:
-   ```bash
-   mvn spring-boot:run
-   ```
+| Dependency | Address / default |
+|---|---|
+| Kafka | `localhost:9092` |
+| Hotel PostgreSQL | `localhost:5432`, database `hoteldb` |
+| Reservation PostgreSQL with pgvector | `localhost:5433`, database `reservationdb` |
+| SonarQube | `http://localhost:9000` |
 
-3. Use Docker Compose to start SonarQube, Kafka, and PostgreSQL:
-   ```bash
-   docker-compose up -d
-   ```
+The database defaults in `docker-compose.yml` are `postgres` / `mysecretpassword`; replace them with secured values for non-local environments.
 
-Each service runs independently. Ensure the dependent services (like Kafka or PostgreSQL) are running before starting
-services that rely on them.
+## Runtime Environment Variables
 
-## Project Structure
+The Hotel, Reservation, and Notification services resolve secrets from environment variables. Do not put secret values in `application.yml` or commit them to source control.
 
-<pre>  
-      oteller-microservices/ 
-      ├── apigateway/ 
-      ├── hotelservice/ 
-      ├── reservationservice/ 
-      ├── notificationservice/ 
-      ├── common-events/ 
-      ├── docker-compose.yml 
-      └── README.md 
-</pre>
+| Variable | Used by | Purpose |
+|---|---|---|
+| `OPEN_AI_KEY` | Hotel, Reservation, Notification | OpenAI API key |
+| `MAIL_USERNAME` | Notification | SMTP account username |
+| `MAIL_PASSWORD` | Notification | SMTP password or provider app password |
 
-## Future Improvements
+When deploying these services to Tomcat, configure the applicable variables in the Tomcat service environment and restart Tomcat. The API Gateway and `common-events` do not require these variables.
 
-- Authentication and authorization (e.g., Keycloak or OAuth2)
-- API documentation with Swagger / OpenAPI
-- Centralized configuration (e.g., Spring Cloud Config)
-- Tracing and monitoring (e.g., Zipkin, Prometheus, Grafana)
+For local development, define the needed variables in the shell before starting the service. Example for Windows PowerShell:
 
-- integration tests
-- add profiles like dev, test....
-- use of actuator, to chekc health of the app, is it fast and son on
-- factoryBean
-- use Pageable
-- to avoid N+1 problem use this -->  List<Hotel> findAllWithRooms();
-- Compensating Transaction Pattern for rollback,
-  if reservation update failed, then rollback the room availability
-- use join entity (also called an association class) instead of @ManyToMany ,
-  create one entity with two fields which have ManyToMany relations
-- use spring data jpa Pageable
-- use hibernate
-- liquibase, flyway
-- DATABASECHANGELOG to sum checksum
-- actuator
-- AOP kullan
-- Optional wrapper sınıf kullan
-- lampda expresiion -- > funktional interface --> use predicate
+```powershell
+$env:OPEN_AI_KEY="<your-api-key>"
+$env:MAIL_USERNAME="<your-smtp-username>"
+$env:MAIL_PASSWORD="<your-smtp-app-password>"
+```
 
+Example for macOS/Linux:
 
+```bash
+export OPEN_AI_KEY="<your-api-key>"
+export MAIL_USERNAME="<your-smtp-username>"
+export MAIL_PASSWORD="<your-smtp-app-password>"
+```
+
+Only define the variables needed by the service you are running.
+
+## Build and Run
+
+Build all Maven modules from the repository root (requires Maven):
+
+```bash
+mvn clean install
+```
+
+Start the services individually in separate terminals, after infrastructure is available:
+
+```powershell
+# Windows PowerShell, from each service directory
+.\mvnw.cmd spring-boot:run
+```
+
+```bash
+# macOS/Linux, from each service directory
+./mvnw spring-boot:run
+```
+
+Start `hotelservice`, `reservationservice`, `notificationservice`, and `apigateway` separately as needed. For gateway requests, start the target service too. The gateway's JWT issuer is currently configured as `http://localhost:8080`; set it to the actual identity provider issuer for your environment.
+
+## Event Flow
+
+Kafka topics are configured in the service application configuration:
+
+| Topic | Flow |
+|---|---|
+| `room-reserved-events` | Hotel Service publishes successful room reservation details; Reservation Service consumes them |
+| `reservation-created-events` | Reservation Service publishes a created reservation; Notification Service consumes it and sends an email |
+| `room-released-events` | Reservation Service publishes a cancellation; Hotel Service consumes it to release the room |
+
+The event payloads and shared enums are defined in `common-events`.
+
+## Tests
+
+Run tests from an individual service directory:
+
+```powershell
+# Windows
+.\mvnw.cmd test
+```
+
+```bash
+# macOS/Linux
+./mvnw test
+```
+
+JaCoCo reports are generated under each module's `target/site/jacoco/` directory when its report goal runs.
+
+## Modules
+
+```text
+oteller-microservices/
+├── apigateway/
+├── common-events/
+├── hotelservice/
+├── notificationservice/
+├── reservationservice/
+├── docker-compose.yml
+└── README.md
+```

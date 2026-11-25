@@ -1,80 +1,65 @@
-# Gateway-service - Oteller Microservices Project
+# API Gateway – Oteller Microservices
 
-The **Gateway Service** is part of the *Oteller Microservices Architecture*.
-API Gateway acts as a single entry point to the system. It is responsible for routing incoming requests to the
-appropriate microservices.
+The **API Gateway** is the system's reactive entry point. It routes requests to the Hotel Service and Reservation Service and removes the gateway-specific URL prefix before forwarding each request.
 
 ## Features
 
-- routing incoming requests
+- Route hotel requests to the Hotel Service
+- Route reservation requests to the Reservation Service
+- Spring Cloud Gateway with WebFlux
+- OAuth2 resource-server/JWT configuration
+- Actuator dependency for application monitoring
 
-## Tech Stack
+## Technology Stack
 
 - Java 17
 - Spring Boot
 - Spring Cloud Gateway
+- Spring WebFlux
+- Spring Security OAuth2 Resource Server
 - Maven
+- JaCoCo
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+- JDK 17 or later
+- Maven, or the included Maven Wrapper
+- Hotel Service and/or Reservation Service running for proxied requests
+- An OAuth2 issuer if JWT validation is enabled in the deployment
 
-- Java 17+
-- Maven
+## Configuration and Startup
 
-### Running the Application
+The gateway listens on port `8080` by default. Routes and the JWT issuer are configured in `src/main/resources/application.yml`.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/oteller-microservices.git
-   cd apigateway
-   ```
+| Gateway path | Forwarded service | Path forwarded to service |
+|---|---|---|
+| `/hotel-service/**` | `http://localhost:8081` | Prefix `/hotel-service` is removed |
+| `/reservation-service/**` | `http://localhost:8082` | Prefix `/reservation-service` is removed |
 
-2. Start the application:
-   ```bash
-   mvn spring-boot:run
-   ```
+For example, `GET http://localhost:8080/reservation-service/reservation` is forwarded to `GET http://localhost:8082/reservation`.
 
-3. (Optional) Run SonarQube for Code Quality Analysis:
+The current JWT issuer URI is `http://localhost:8080`. Set it to the actual identity provider's issuer URI for your environment. The API Gateway itself does not use `OPEN_AI_KEY`; configure that variable on the AI-enabled Hotel, Reservation, and Notification services instead.
 
-   #### Option A: Using Docker
-    * it should be runable if you already run docker compose file
+Run the gateway from this directory:
 
-    * Then open http://localhost:9000
-    * Login with:  
-      user: admin  
-      passwort: admin  
-      you will be prompted to change the password
+```bash
+# Windows
+.\mvnw.cmd spring-boot:run
 
-   #### Option B: Manual Installation
-    * Download SonarQube: https://www.sonarsource.com/products/sonarqube/downloads/
+# macOS/Linux
+./mvnw spring-boot:run
+```
 
-    * Extract and run:  
-      On Windows: StartSonar.bat  
-      On Linux/macOS: sonar.sh start
+## Tests
 
-    * Open http://localhost:9000
+```bash
+# Windows
+.\mvnw.cmd test
 
-   Generate a Token for CLI Scanning
-    1. Log in to SonarQube
+# macOS/Linux
+./mvnw test
+```
 
-    2. Go to My Account > Security
+## SonarQube
 
-    3. Create a new token (e.g., gateway-service)
-
-    4. Copy the token and configure the following file in your project root:
-       ```yaml
-          sonar-project.properties  
-       ```
-
-       ```yaml
-          sonar.projectKey=gateway-service
-          sonar.projectName=gateway-service
-          sonar.sources=src
-          sonar.java.binaries=target
-          sonar.login=your_generated_token_here
-       ```
-    5. Run the Scanner:
-       ```bash
-       sonar-scanner
-       ```
+The repository Docker Compose setup includes SonarQube at `http://localhost:9000`. Create a SonarQube token and configure it in `sonar-project.properties`, then run `sonar-scanner` from the `apigateway` directory.

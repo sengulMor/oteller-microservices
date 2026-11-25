@@ -1,106 +1,126 @@
-# Notification Service - Oteller Microservices Project
+# Notification Service – Oteller Microservices
 
-The **Notification Service** is part of the *Oteller Microservices Architecture*. It listens for Kafka events (e.g.,
-`reservation-created-events`) and simulates sending notification emails to customers who reserve hotel rooms.
+The **Notification Service** consumes reservation-created events from Kafka and sends reservation confirmation emails. It uses Spring AI to generate email content.
 
 ## Features
 
-- Kafka integration for event-driven communication
-- Email notification simulation
-- Robust exception handling with meaningful error messages
-- Unit testing with JUnit and Mockito
+- Consume reservation-created events from Kafka
+- Generate AI-assisted reservation confirmation messages
+- Send email notifications over SMTP
+- Validate incoming events and handle email errors
+- JUnit 5 and Mockito tests
 
-## Tech Stack
+## Technology Stack
 
 - Java 17
-- Spring Boot
+- Spring Boot 3 / Spring Web
+- Apache Kafka and Spring Kafka
+- Spring Mail
+- Spring AI OpenAI
+- Maven
+- JaCoCo and SonarQube
+
+## Prerequisites
+
+- JDK 17 or later
 - Apache Kafka
-- Maven
+- SMTP account for sending email
+- For AI-generated email content: a valid OpenAI API key
+- Optional: Docker and Docker Compose
 
-## Getting Started
+## Start the Infrastructure
 
-### Prerequisites
+From the repository root, start the shared infrastructure:
 
-- Java 17 or higher
-- Maven
-- Kafka (can be run via Docker or installed locally)
+```bash
+docker compose up -d
+```
 
-### Running the Application
+The Notification Service connects to Kafka at `localhost:9092`. It consumes the `reservation-created-events` topic.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/oteller-microservices.git
-   cd notificationservice
-   ```
+## Configure and Start the Application
 
-2. Configure the email user in `src/main/resources/application.yml`:
+The service runs on port `8083` by default. Its `application.yml` reads the SMTP credentials and OpenAI key from environment variables:
 
-   ```yaml
-   spring:
-     kafka:
-       topic:
-         reservation-created: reservation-created-events
-       bootstrap-servers: localhost:9092
-     mail:
-       host: smtp.gmail.com
-       port: 587
-       username: fakemail@gmail.com
-       password: 
-       properties:
-         mail:
-           smtp:
-             auth: true
-             starttls:
-               enable: true
-             ssl:
-               trust: smtp.gmail.com
-   ```
+```yaml
+spring:
+  mail:
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+  ai:
+    openai:
+      api-key: ${OPEN_AI_KEY}
+```
 
-3. Start the application:
-   ```bash
-   mvn spring-boot:run
-   ```
+For Tomcat deployments, configure `MAIL_USERNAME`, `MAIL_PASSWORD`, and `OPEN_AI_KEY` in the Tomcat service's environment, then restart Tomcat for the changes to take effect. Keep these values out of `application.yml` and source control.
 
-4. (Optional) Run SonarQube for Code Quality Analysis:
+For local development with `spring-boot:run`, define the variables in the shell before starting the service:
 
-   #### Option A: Using Docker
-    * it should be runable if you already run docker compose file
+```powershell
+# Windows PowerShell
+$env:MAIL_USERNAME="<your-smtp-username>"
+$env:MAIL_PASSWORD="<your-smtp-app-password>"
+$env:OPEN_AI_KEY="<your-api-key>"
+```
 
-    * Then open http://localhost:9000
-    * Login with:  
-      user: admin  
-      passwort: admin  
-      you will be prompted to change the password
+```bash
+# macOS/Linux
+export MAIL_USERNAME="<your-smtp-username>"
+export MAIL_PASSWORD="<your-smtp-app-password>"
+export OPEN_AI_KEY="<your-api-key>"
+```
 
-   #### Option B: Manual Installation
-    * Download SonarQube: https://www.sonarsource.com/products/sonarqube/downloads/
+### Run the service
 
-    * Extract and run:  
-      On Windows: StartSonar.bat  
-      On Linux/macOS: sonar.sh start
+```bash
+# Windows
+.\mvnw.cmd spring-boot:run
 
-    * Open http://localhost:9000
+# macOS/Linux
+./mvnw spring-boot:run
+```
 
-   Generate a Token for CLI Scanning
-    1. Log in to SonarQube
+## Kafka
 
-    2. Go to My Account > Security
+| Setting | Default |
+|---|---|
+| Bootstrap server | `localhost:9092` |
+| Topic | `reservation-created-events` |
+| Consumer group | `notification-group` |
 
-    3. Create a new token (e.g., notification-service)
+When a valid reservation-created event is received, the service generates an AI-assisted message and sends it to the guest using the configured SMTP account.
 
-    4. Copy the token and configure the following file in your project root:
-       ```yaml
-          sonar-project.properties  
-       ```
+## Tests
 
-       ```yaml
-          sonar.projectKey=notification-service
-          sonar.projectName=notification-service
-          sonar.sources=src
-          sonar.java.binaries=target
-          sonar.login=your_generated_token_here
-       ```
-    5. Run the Scanner:
-       ```bash
-       sonar-scanner
-       ```
+Run all tests:
+
+```bash
+# Windows
+.\mvnw.cmd test
+
+# macOS/Linux
+./mvnw test
+```
+
+## SonarQube
+
+After starting SonarQube with Docker Compose:
+
+1. Open `http://localhost:9000`.
+2. Sign in with `admin / admin` and change the initial password.
+3. Create a token under **My Account → Security**.
+4. Configure the token in `sonar-project.properties`:
+
+```properties
+sonar.projectKey=notification-service
+sonar.projectName=Notification Service
+sonar.sources=src
+sonar.java.binaries=target
+sonar.login=<your-generated-token>
+```
+
+5. Run the scanner from the `notificationservice` directory:
+
+```bash
+sonar-scanner
+```
